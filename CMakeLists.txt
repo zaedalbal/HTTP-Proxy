@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.31)
 project(proxy)
 
-set(CMAKE_CXX_STANDARD 20)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
