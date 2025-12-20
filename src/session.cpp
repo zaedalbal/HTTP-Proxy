@@ -5,8 +5,7 @@
 #include <atomic>
 #include <array>
 
-Session::Session(boost::asio::ip::tcp::socket socket) : client_socket_(std::move(socket)),
-upstream_(client_socket_.get_executor())
+Session::Session(boost::asio::ip::tcp::socket socket) : client_socket_(std::move(socket))
 {}
 
 boost::asio::awaitable<void> Session::start_session()
@@ -57,21 +56,44 @@ boost::asio::awaitable<void> Session::send_bad_request(const std::string str)
 boost::asio::awaitable<void> Session::http_handler
 (const std::string& host, const std::string& port, const boost::beast::http::request<boost::beast::http::string_body> request)
 {
-    try
+    auto executor = client_socket_.get_executor();
+    boost::beast::flat_buffer read_buffer;
+    boost::asio::ip::tcp::resolver resolver(executor);
+    boost::asio::ip::tcp::socket upstream(executor);
+    boost::system::error_code ec;
+    auto results = co_await resolver.async_resolve(host, port, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    if(ec)
+        co_return;
+    co_await boost::asio::async_connect(upstream, results, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    if(ec)
+        co_return;
+    for(int i = 0;; ++i)
     {
-        boost::beast::flat_buffer read_buffer_;
-        boost::beast::http::response<boost::beast::http::string_body> response;
-        boost::asio::ip::tcp::resolver resolver(client_socket_.get_executor());
-        auto results = co_await resolver.async_resolve(host, port, boost::asio::use_awaitable);
-        co_await upstream_.async_connect(results, boost::asio::use_awaitable);
-        co_await boost::beast::http::async_write(upstream_, request, boost::asio::use_awaitable);
-        co_await boost::beast::http::async_read(upstream_, read_buffer_, response, boost::asio::use_awaitable);
-        co_await boost::beast::http::async_write(client_socket_, response, boost::asio::use_awaitable);
+        boost::beast::http::request<boost::beast::http::string_body> req;
+        boost::beast::http::response<boost::beast::http::string_body> res;
+        if(i == 0)
+            req = std::move(request);
+        else
+            co_await boost::beast::http::async_read(client_socket_, read_buffer, req, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            if(ec)
+                break;
+        co_await boost::beast::http::async_write(upstream, req, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+        if(ec)
+            break;
+        co_await boost::beast::http::async_read(upstream, read_buffer, res, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+        if(ec)
+            break;
+        res.keep_alive(req.keep_alive());
+        co_await boost::beast::http::async_write(client_socket_, res, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+        if(ec)
+            break;
+        if(!req.keep_alive() || !res.keep_alive())
+            break;
+        read_buffer.consume(read_buffer.size());
     }
-    catch(const std::exception& ex)
-    {
-        std::cerr << "Exception: " << ex.what() << std::endl;
-    }
+    upstream.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    upstream.close();
+    co_return;
 }
 
 boost::asio::awaitable<void> Session::https_handler (const std::string& host, const std::string& port)

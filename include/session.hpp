@@ -26,6 +26,4 @@ class Session : public std::enable_shared_from_this<Session>
 
     private:
         boost::asio::ip::tcp::socket client_socket_;
-
-        boost::beast::tcp_stream upstream_;
 };
