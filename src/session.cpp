@@ -38,7 +38,9 @@ boost::asio::awaitable<void> Session::handle_request()
     }
     catch(const std::exception& ex)
     {
+#ifdef DEBUG
         std::cerr << "Exception in handle request: " << ex.what();
+#endif
     }
 }
 
@@ -130,8 +132,10 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
             if(ec)
                 break;
         }
+#ifdef DEBUG
         if(ec)
             std::cerr << "Error in client_to_server: " << ec.what() << std::endl;
+#endif
         if(!finished->exchange(true))
             close_both();
     };
@@ -153,8 +157,10 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
             if(ec)
                 break;
         }
+#ifdef DEBUG
         if(ec)
             std::cerr << "Error in server_to_client: " << ec.what() << std::endl;
+#endif
         if(!finished->exchange(true))
             close_both();
     };
@@ -162,7 +168,9 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     co_await boost::asio::async_connect(*upstream_ptr, results, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if(ec)
     {
+#ifdef DEBUG
         std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
+#endif
         co_await send_bad_request(ec.what());
         co_return;
     }
@@ -170,7 +178,6 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     res.reason("Connection Established");
     res.prepare_payload();
     co_await boost::beast::http::async_write(client_socket_, res, boost::asio::use_awaitable);
-    boost::asio::co_spawn(client_socket_.get_executor(), client_to_server, boost::asio::detached);
-    boost::asio::co_spawn(client_socket_.get_executor(), server_to_client, boost::asio::detached);
+    co_await (boost::asio::experimental::awaitable_operators::operator&&(client_to_server(), server_to_client()));
     co_return;
 }

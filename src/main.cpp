@@ -1,24 +1,44 @@
 #include "../include/server.hpp"
 #include "../include/session.hpp"
 #include <iostream>
+#include <cstdlib>
 
-#define PORT 12345
+#define DEFAULT_PORT 12345
 
 int main(int argc, char** argv)
 {
     try
     {
+        unsigned short port = DEFAULT_PORT;
+        if(argc > 1)
+        {
+            char* end;
+            long parsed_port = std::strtol(argv[1], &end, 10);
+            if(*end != '\0' || parsed_port < 1 || parsed_port > 65535)
+            {
+                std::cerr << "Error: Invalid port number. Must be between 1 and 65535.\n";
+                std::cerr << "Usage: " << argv[0] << " [port]\n";
+                return 1;
+            }
+            port = static_cast<unsigned short>(parsed_port);
+        }
+        std::cout << "Starting proxy server on port " << port << "...\n";
         boost::asio::io_context context;
-        auto server = std::make_shared<Server>(context, PORT);
-        boost::asio::co_spawn(context, [server]()->boost::asio::awaitable<void>
+        auto server = std::make_shared<Server>(context, port);
+        boost::asio::co_spawn(context, [server]() -> boost::asio::awaitable<void>
+        {
+            co_await server->run();
+        }, boost::asio::detached);
+        context.run();
+    }
+    catch(const std::exception& ex)
     {
-        co_await server->run();
-    }, boost::asio::detached);
-    context.run();
+        std::cerr << "\n!!!EXCEPTION IN MAIN FUNC: " << ex.what() << "!!!\n";
+        return 1;
     }
     catch(...)
     {
-        std::cerr << "\n!!!EXCEPTION IN MAIN FUNC!!!\n";
+        std::cerr << "\n!!!UNKNOWN EXCEPTION IN MAIN FUNC!!!\n";
         return 1;
     }
     return 0;

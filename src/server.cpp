@@ -26,7 +26,9 @@ boost::asio::awaitable<void> Server::accept_connections()
         }
         catch(const std::exception& ex)
         {
+#ifdef DEBUG
             std::cout << "Exception in acception: " << ex.what() << std::endl;
+#endif
         }
     }
 }
