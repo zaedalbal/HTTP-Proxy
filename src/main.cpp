@@ -9,8 +9,8 @@ int main(int argc, char** argv)
 {
     try
     {
-        unsigned short port = DEFAULT_PORT;
-        if(argc > 1)
+        unsigned short port = DEFAULT_PORT; // изначально дефолтный порт
+        if(argc > 1) // если указан аргумент, то использовать его как порт
         {
             char* end;
             long parsed_port = std::strtol(argv[1], &end, 10);
@@ -24,12 +24,12 @@ int main(int argc, char** argv)
         }
         std::cout << "Starting proxy server on port " << port << "...\n";
         boost::asio::io_context context;
-        auto server = std::make_shared<Server>(context, port);
+        auto server = std::make_shared<Server>(context, port); // создание сервера
         boost::asio::co_spawn(context, [server]() -> boost::asio::awaitable<void>
         {
             co_await server->run();
         }, boost::asio::detached);
-        context.run();
+        context.run(); // запуск сервера
     }
     catch(const std::exception& ex)
     {

@@ -6,7 +6,7 @@
 class Server : public std::enable_shared_from_this<Server>
 {
     public:
-        Server(boost::asio::io_context& context, unsigned short port);
+        Server(boost::asio::io_context& context, unsigned short port); // конструктор
 
         boost::asio::awaitable<void> run(); // запуск сервера
 
@@ -14,9 +14,9 @@ class Server : public std::enable_shared_from_this<Server>
         boost::asio::awaitable<void> accept_connections(); // принимает соеденения, создает и запускает сессии
 
     private:
-        unsigned short port_;
+        unsigned short port_; // порт на котором работает сервер
 
-        boost::asio::io_context& io_context_;
+        boost::asio::io_context& io_context_; // контекст boost asio
 
-        boost::asio::ip::tcp::acceptor acceptor_;
+        boost::asio::ip::tcp::acceptor acceptor_; // acceptor для приема соеденений
 };
