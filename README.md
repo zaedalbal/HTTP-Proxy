@@ -1,31 +1,91 @@
 # HTTP Proxy Server
 
-Асинхронный HTTP прокси-сервер на C++ с использованием Boost.Asio и Boost.Beast
+Асинхронный HTTP/HTTPS прокси-сервер на C++ с использованием **Boost.Asio** и **Boost.Beast**.
+
+Поддерживается:
+
+* HTTP/1.1 проксирование
+* HTTPS через метод `CONNECT` (туннелирование)
+
+---
 
 ## Требования
 
-- C++23
-- CMake 3.31+
-- Boost
+Для сборки и запуска необходимы:
 
-## Сборка
+* Компилятор с поддержкой **C++23**
+* **CMake 3.31+**
+* **Boost 1.82+**
+  (используются `asio`, `beast`, `system`)
+* Git
+
+### Установка зависимостей
+
+**Для Ubuntu/Debian:**
 
 ```bash
-mkdir build && cd build
-cmake ..
-make
+sudo apt install git cmake g++ libboost-dev libboost-system-dev
 ```
 
-## Запуск
+**Для Fedora:**
+
+```bash
+sudo dnf install git cmake gcc-c++ boost-devel
+```
+
+**Для Arch Linux / Manjaro:**
+
+```bash
+sudo pacman -S git cmake gcc boost
+```
+
+---
+
+## Клонирование репозитория
+
+```bash
+git clone https://github.com/zaedalbal/HTTP-Proxy.git
+cd HTTP-Proxy
+```
+
+---
+
+## Сборка проекта
+
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
+После успешной сборки в каталоге `build` будет создан исполняемый файл прокси.
+
+---
+
+## Запуск прокси
+
+Из каталога `build`:
 
 ```bash
 ./proxy
 ```
 
+По умолчанию прокси запускается на порту `12345`.
+
+---
+
 ## Структура проекта
 
-```
+```text
 include/          # Заголовочные файлы
-src/             # Исходные файлы
-CMakeLists.txt   # Конфигурация сборки
+src/              # Исходные файлы
+CMakeLists.txt    # Конфигурация сборки
 ```
+
+---
+
+## Примечания
+
+* Прокси не выполняет анализ или модификацию HTTPS-трафика
+* Поддерживается только HTTP/1.1
