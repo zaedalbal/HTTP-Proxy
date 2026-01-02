@@ -1,7 +1,9 @@
 #pragma once
+#include "traffic_limiter.hpp"
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <memory>
+#include <chrono>
 
 #define TUNNEL_BUFFER_SIZE 16184
 
@@ -26,4 +28,6 @@ class Session : public std::enable_shared_from_this<Session>
 
     private:
         boost::asio::ip::tcp::socket client_socket_; // сокет клиента
+
+        traffic_limiter traffic_limiter_; // лимитер трафика
 };

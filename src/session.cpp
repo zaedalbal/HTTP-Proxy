@@ -127,10 +127,25 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
             (boost::asio::buffer(read_buffer_from_client), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
             if(bytes_transferred == 0 || ec)
                 break;
-            co_await boost::asio::async_write
-            (*upstream_ptr, boost::asio::buffer(read_buffer_from_client, bytes_transferred), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-            if(ec)
-                break;
+            std::size_t offset = 0;
+            while(offset < bytes_transferred)
+            {
+                auto allowed = self->traffic_limiter_.acquire(bytes_transferred - offset);
+                if(allowed == 0) // ждать 10 мс пока токены не обновятся
+                {
+                    boost::asio::steady_timer timer(self->client_socket_.get_executor());
+                    timer.expires_after(std::chrono::milliseconds(10));
+                    co_await timer.async_wait(boost::asio::use_awaitable);
+                    continue;
+                }
+                auto sent = co_await boost::asio::async_write
+                (*upstream_ptr,
+                boost::asio::buffer(read_buffer_from_client.data() + offset, allowed),
+                boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+                if(ec)
+                    break;
+                offset += sent;
+            }
         }
 #ifdef DEBUG
         if(ec)
