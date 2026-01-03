@@ -10,7 +10,6 @@ Traffic_limiter::Traffic_limiter()
 
 void Traffic_limiter::refill()
 {
-    std::lock_guard lock(mutex_);
     auto now = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration<double>(now - last_update_).count(); // сколько секунд прошло с последнего обновления
     tokens_ = std::min(max_tokens_, tokens_ + static_cast<std::size_t>(elapsed * rate_bytes_per_sec_)); // сколько байт надо добавить
