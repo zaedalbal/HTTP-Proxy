@@ -2,6 +2,8 @@
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <memory>
+#include <map>
+#include "user_traffic_manager.hpp"
 
 class Server : public std::enable_shared_from_this<Server>
 {
@@ -19,4 +21,6 @@ class Server : public std::enable_shared_from_this<Server>
         boost::asio::io_context& io_context_; // контекст boost asio
 
         boost::asio::ip::tcp::acceptor acceptor_; // acceptor для приема соеденений
+
+        std::shared_ptr<User_traffic_manager> user_traffic_manager_;
 };

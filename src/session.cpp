@@ -5,8 +5,13 @@
 #include <atomic>
 #include <array>
 
-Session::Session(boost::asio::ip::tcp::socket socket) : client_socket_(std::move(socket))
-{}
+Session::Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<User_traffic_manager> manager)
+: client_socket_(std::move(socket))
+{
+    auto ep = client_socket_.remote_endpoint();
+    auto client_ip = ep.address().to_string();
+    traffic_limiter_ = manager->get_or_create_user(client_ip); 
+}
 
 boost::asio::awaitable<void> Session::start_session()
 {
@@ -130,7 +135,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
             std::size_t offset = 0;
             while(offset < bytes_transferred)
             {
-                auto allowed = self->traffic_limiter_.acquire(bytes_transferred - offset);
+                auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
                 if(allowed == 0) // ждать 10 мс пока токены не обновятся
                 {
                     boost::asio::steady_timer timer(self->client_socket_.get_executor());

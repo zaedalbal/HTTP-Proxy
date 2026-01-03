@@ -1,18 +1,23 @@
+#pragma once
 #include <chrono>
+#include <thread>
 
-struct traffic_limiter
+class Traffic_limiter
 {
-        traffic_limiter(); // конструктор
+        public:
+                Traffic_limiter(); // конструктор
 
-        std::size_t max_tokens_; // максимальное кол-во байт
+                std::size_t acquire(std::size_t want); // возвращает сколько байт можно переслать и уменьшает счетчик
 
-        std::size_t tokens_; // сколько байт может переслать на данный момент
+                void refill(); // обновляет счетчик байт
+        private:
+                std::size_t max_tokens_; // максимальное кол-во байт
 
-        double rate_bytes_per_sec_; // текущая скорость с которой клиент может пересылать данные (байты в секунду)
+                std::size_t tokens_; // сколько байт может переслать на данный момент
 
-        std::chrono::steady_clock::time_point last_update_; // когда последний раз клиент пересылал данные
+                double rate_bytes_per_sec_; // текущая скорость с которой клиент может пересылать данные (байты в секунду)
 
-        void refill(); // обновляет счетчик байт
+                std::chrono::steady_clock::time_point last_update_; // когда последний раз клиент пересылал данные
 
-        std::size_t acquire(std::size_t want); // возвращает сколько байт можно переслать и уменьшает счетчик
+                std::mutex mutex_; // мьютекс для потокобезопасности
 };

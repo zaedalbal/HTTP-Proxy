@@ -1,6 +1,6 @@
 #include "../include/traffic_limiter.hpp"
 
-traffic_limiter::traffic_limiter()
+Traffic_limiter::Traffic_limiter()
 {
     max_tokens_ = 2 * 1024 * 1024; // 2 мб по дефолту
     tokens_ = max_tokens_;
@@ -8,16 +8,18 @@ traffic_limiter::traffic_limiter()
     last_update_ = std::chrono::steady_clock::now();
 }
 
-void traffic_limiter::refill()
+void Traffic_limiter::refill()
 {
+    std::lock_guard lock(mutex_);
     auto now = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration<double>(now - last_update_).count(); // сколько секунд прошло с последнего обновления
     tokens_ = std::min(max_tokens_, tokens_ + static_cast<std::size_t>(elapsed * rate_bytes_per_sec_)); // сколько байт надо добавить
     last_update_ = now;
 }
 
-std::size_t traffic_limiter::acquire(std::size_t want)
+std::size_t Traffic_limiter::acquire(std::size_t want)
 {
+    std::lock_guard lock(mutex_);
     refill();
     std::size_t allowed = std::min(tokens_, want);
     tokens_ -= allowed;

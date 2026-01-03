@@ -1,5 +1,5 @@
 #pragma once
-#include "traffic_limiter.hpp"
+#include "user_traffic_manager.hpp"
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <memory>
@@ -10,7 +10,7 @@
 class Session : public std::enable_shared_from_this<Session>
 {
     public:
-        Session(boost::asio::ip::tcp::socket socket); // конструктор
+        Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<User_traffic_manager> manager); // конструктор
         
         boost::asio::awaitable<void> start_session(); // начало сессии
     private:
@@ -29,5 +29,5 @@ class Session : public std::enable_shared_from_this<Session>
     private:
         boost::asio::ip::tcp::socket client_socket_; // сокет клиента
 
-        traffic_limiter traffic_limiter_; // лимитер трафика
+        std::shared_ptr<Traffic_limiter> traffic_limiter_; // лимитер трафика
 };
