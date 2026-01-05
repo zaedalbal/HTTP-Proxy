@@ -4,6 +4,7 @@
 #include <iostream>
 #include <atomic>
 #include <array>
+#include <sstream>
 
 Session::Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<User_traffic_manager> manager)
 : client_socket_(std::move(socket))
@@ -63,43 +64,140 @@ boost::asio::awaitable<void> Session::send_bad_request(const std::string str)
 boost::asio::awaitable<void> Session::http_handler
 (const std::string& host, const std::string& port, const boost::beast::http::request<boost::beast::http::string_body> request)
 {
-    auto executor = client_socket_.get_executor();
-    boost::beast::flat_buffer read_buffer;
-    boost::asio::ip::tcp::resolver resolver(executor);
-    boost::asio::ip::tcp::socket upstream(executor);
+    boost::asio::ip::tcp::resolver resolver(client_socket_.get_executor());
     boost::system::error_code ec;
-    auto results = co_await resolver.async_resolve(host, port, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(client_socket_.get_executor());
+    auto finished = std::make_shared<std::atomic_bool>(false);
+    auto self = shared_from_this();
+    
+    auto results = co_await resolver.async_resolve(
+        host, port, 
+        boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    co_await boost::asio::async_connect(
+        *upstream_ptr, results, 
+        boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if(ec)
-        co_return;
-    co_await boost::asio::async_connect(upstream, results, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-    if(ec)
-        co_return;
-    for(int i = 0;; ++i)
     {
-        boost::beast::http::request<boost::beast::http::string_body> req;
-        boost::beast::http::response<boost::beast::http::string_body> res;
-        if(i == 0)
-            req = std::move(request);
-        else
-            co_await boost::beast::http::async_read(client_socket_, read_buffer, req, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+#ifdef DEBUG
+        std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
+#endif
+        co_await send_bad_request(ec.what());
+        co_return;
+    }
+    auto close_both = [self, upstream_ptr]()
+    {
+        boost::system::error_code ec;
+        self->client_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+        upstream_ptr->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+        self->client_socket_.close(ec);
+        upstream_ptr->close(ec);
+    };
+    const size_t MAX_BODY_SIZE = 1024 * 1024 * 64;
+    if(request.body().size() > MAX_BODY_SIZE)
+    {
+        co_await send_bad_request("Error: HTTP request body too large!");
+        close_both();
+        co_return;
+    }
+    
+    auto request_str = std::make_shared<std::string>();
+    std::ostringstream oss;
+    oss << request;
+    *request_str = oss.str();
+    
+    auto client_to_server = [self, upstream_ptr, finished, close_both, request_str]() -> boost::asio::awaitable<void>
+    {
+        boost::system::error_code ec;
+        auto bytes_transferred = request_str->size();
+        std::size_t offset = 0;
+        while(offset < bytes_transferred)
+        {
+            auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
+            if(allowed == 0)
+            {
+                boost::asio::steady_timer timer(self->client_socket_.get_executor());
+                timer.expires_after(std::chrono::milliseconds(10));
+                co_await timer.async_wait(boost::asio::use_awaitable);
+                continue;
+            }
+            auto sent = co_await boost::asio::async_write(
+                *upstream_ptr,
+                boost::asio::buffer(request_str->data() + offset, allowed),
+                boost::asio::redirect_error(boost::asio::use_awaitable, ec));
             if(ec)
                 break;
-        co_await boost::beast::http::async_write(upstream, req, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            offset += sent;
+        }
+        
+#ifdef DEBUG
         if(ec)
-            break;
-        co_await boost::beast::http::async_read(upstream, read_buffer, res, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-        if(ec)
-            break;
-        res.keep_alive(req.keep_alive());
-        co_await boost::beast::http::async_write(client_socket_, res, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-        if(ec)
-            break;
-        if(!req.keep_alive() || !res.keep_alive())
-            break;
-        read_buffer.consume(read_buffer.size());
+            std::cerr << "Error in client_to_server: " << ec.what() << std::endl;
+#endif
+        
+        if(!finished->exchange(true));
+    };
+
+    auto server_to_client = [self, upstream_ptr, finished, close_both]() -> boost::asio::awaitable<void>
+    {
+        boost::system::error_code ec;
+        boost::beast::flat_buffer read_buffer;
+        boost::beast::http::response<boost::beast::http::string_body> res;
+
+        co_await boost::beast::http::async_read(
+            *upstream_ptr, 
+            read_buffer, 
+            res,
+            boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+        
+        if(ec)  
+        {
+#ifdef DEBUG
+        std::cerr << "Error reading response from upstream: " << ec.what() << std::endl;
+#endif
+            if(!finished->exchange(true))
+            co_return;
+        }
+        const size_t MAX_BODY_SIZE = 1024 * 1024 * 64;
+        if(res.body().size() > MAX_BODY_SIZE)   
+    {
+#ifdef DEBUG
+        std::cerr << "Error: HTTP response body too large!" << std::endl;
+#endif
+        if(!finished->exchange(true))
+        co_return;
     }
-    upstream.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    upstream.close();
+        auto response_str = std::make_shared<std::string>();
+        std::ostringstream oss;
+        oss << res;
+        *response_str = oss.str();
+        auto bytes_transferred = response_str->size();
+        std::size_t offset = 0;
+        while(offset < bytes_transferred)
+        {
+            auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
+            if(allowed == 0)
+            {
+                boost::asio::steady_timer timer(self->client_socket_.get_executor());
+                timer.expires_after(std::chrono::milliseconds(10));
+                co_await timer.async_wait(boost::asio::use_awaitable);
+                continue;
+            }
+            auto sent = co_await boost::asio::async_write(
+                self->client_socket_,
+                boost::asio::buffer(response_str->data() + offset, allowed),
+                boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            if(ec)
+                break;
+            offset += sent;
+        }
+#ifdef DEBUG
+    if(ec)
+        std::cerr << "Error in server_to_client: " << ec.what() << std::endl;
+#endif
+        if(!finished->exchange(true))
+            close_both();
+    };
+    co_await (boost::asio::experimental::awaitable_operators::operator&&(client_to_server(), server_to_client()));
     co_return;
 }
 
