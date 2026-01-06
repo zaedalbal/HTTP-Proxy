@@ -1,4 +1,4 @@
-#include "../include/analyze_request.hpp"
+#include "network/analyze_request.hpp"
 
 HttpHandler::HandlerResult HttpHandler::analyze_request(const boost::beast::http::request<boost::beast::http::string_body>& req)
 {

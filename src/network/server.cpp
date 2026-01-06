@@ -1,5 +1,5 @@
-#include "../include/server.hpp"
-#include "../include/session.hpp"
+#include "network/server.hpp"
+#include "network/session.hpp"
 #include <iostream>
 
 Server::Server(boost::asio::io_context& context, unsigned short port)

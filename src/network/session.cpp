@@ -1,5 +1,5 @@
-#include "../include/session.hpp"
-#include "../include/analyze_request.hpp"
+#include "network/session.hpp"
+#include "network/analyze_request.hpp"
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <iostream>
 #include <atomic>

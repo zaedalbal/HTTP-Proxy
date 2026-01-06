@@ -10,9 +10,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 
-file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp include/*.hpp main.cpp)
+file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 add_executable(proxy ${PROJECT_SOURCES})
 
-target_include_directories(proxy PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(proxy PRIVATE
+${CMAKE_SOURCE_DIR}/include
+${CMAKE_SOURCE_DIR}/lib/tomlplusplus/include
+)
 target_link_libraries(proxy PRIVATE ${Boost_LIBRARIES})
