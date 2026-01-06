@@ -4,7 +4,6 @@ build*/
 cmake-build-*/
 out/
 bin/
-lib/
 dist/
 target/
 
