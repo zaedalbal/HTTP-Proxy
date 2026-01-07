@@ -150,3 +150,6 @@ docs/_build/
 # Core dumps
 core
 core.*
+
+#  Config files
+*.toml

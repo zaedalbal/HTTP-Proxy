@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 
 class Proxy_Config
@@ -7,17 +8,17 @@ class Proxy_Config
 
         struct Proxy_Settings // настройки конфига
         {
-            int max_connections = 256;
+            int max_connections = 256; // пока что не используется
             int timeout_seconds = 60; // пока что не используется
 
-            std::string host = "0.0.0.0";
+            std::string host = "0.0.0.0"; // пока что не используется
             unsigned short port = 12345;
 
             bool log_on = false; // пока что не используется
             std::string log_file_name = "proxy.log"; // пока что не используется
         };
         
-        const Proxy_Settings& get_settings() const; // геттер для получение конфига
+        const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
 
     private:
         Proxy_Settings settings; // текущий конфиг
