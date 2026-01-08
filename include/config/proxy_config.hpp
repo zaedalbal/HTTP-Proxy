@@ -8,8 +8,8 @@ class Proxy_Config
 
         struct Proxy_Settings // настройки конфига
         {
-            int max_connections = 256; // пока что не используется
-            int timeout_seconds = 60; // пока что не используется
+            int64_t max_connections = 256; // пока что не используется
+            int64_t timeout_milliseconds = 10000;
 
             std::string host = "0.0.0.0"; // пока что не используется
             unsigned short port = 12345;

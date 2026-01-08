@@ -15,9 +15,9 @@ bool Proxy_Config::validate() const
         std::cerr << "Error in config: max_connection must be at lest 1" << std::endl;
         return false;
     }
-    if(settings.timeout_seconds <= 0 || settings.timeout_seconds > 3600)
+    if(settings.timeout_milliseconds <= 0 || settings.timeout_milliseconds > 600000)
     {
-        std::cerr << "Error in config: timeout_seconds must be in range 1-3600" << std::endl;
+        std::cerr << "Error in config: timeout_milliseconds must be in range 1-600000" << std::endl;
         return false;
     }
     if(settings.host.empty())
@@ -46,7 +46,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
             {
                 auto proxy = config["proxy"];
                 settings.max_connections = proxy["max_connections"].value_or(settings.max_connections);
-                settings.timeout_seconds = proxy["timeout_seсonds"].value_or(settings.timeout_seconds);
+                settings.timeout_milliseconds = proxy["timeout_seсonds"].value_or(settings.timeout_milliseconds);
                 settings.host = proxy["host"].value_or(settings.host);
                 settings.port = static_cast<unsigned short>(proxy["port"].value_or(settings.port));
                 settings.log_on = proxy["log_on"].value_or(settings.log_on);
@@ -70,7 +70,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
             toml::table
             {
                 {"max_connections", settings.max_connections},
-                {"timeout_seconds", settings.timeout_seconds},
+                {"timeout_milliseconds", settings.timeout_milliseconds},
                 {"host", settings.host},
                 {"port", settings.port},
                 {"log_on", settings.log_on},

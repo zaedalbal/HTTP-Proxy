@@ -3,21 +3,23 @@
 #include "config/proxy_config.hpp"
 #include <iostream>
 
+Proxy_Config::Proxy_Settings PROXY_CONFIG;
+
 int main(int argc, char** argv)
 {
     try
     {
         // Загрузка конфигурации из proxy_config.toml
         Proxy_Config config;
-        const auto& settings = config.get_settings();
+        PROXY_CONFIG = config.get_settings();
         
-        std::cout << "Starting proxy server on " << settings.host 
-                  << ":" << settings.port << "...\n";
-        std::cout << "Max connections: " << settings.max_connections << "\n";
-        std::cout << "Timeout: " << settings.timeout_seconds << " seconds\n";
+        std::cout << "Starting proxy server on " << PROXY_CONFIG.host 
+                  << ":" << PROXY_CONFIG.port << "...\n";
+        std::cout << "Max connections: " << PROXY_CONFIG.max_connections << "\n";
+        std::cout << "Timeout: " << PROXY_CONFIG.timeout_milliseconds << " milliseconds\n";
         
         boost::asio::io_context context;
-        auto server = std::make_shared<Server>(context, settings.port);
+        auto server = std::make_shared<Server>(context, PROXY_CONFIG.port);
         
         boost::asio::co_spawn(context, [server]() -> boost::asio::awaitable<void>
         {

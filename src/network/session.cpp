@@ -1,10 +1,13 @@
 #include "network/session.hpp"
 #include "network/analyze_request.hpp"
+#include "config/global_config.hpp"
 #include <boost/asio/experimental/awaitable_operators.hpp>
+#include "utils/timer.hpp"
 #include <iostream>
 #include <atomic>
 #include <array>
 #include <sstream>
+
 
 Session::Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<User_traffic_manager> manager)
 : client_socket_(std::move(socket))
@@ -64,28 +67,35 @@ boost::asio::awaitable<void> Session::send_bad_request(const std::string str)
 boost::asio::awaitable<void> Session::http_handler
 (const std::string& host, const std::string& port, const boost::beast::http::request<boost::beast::http::string_body> request)
 {
-    boost::asio::ip::tcp::resolver resolver(client_socket_.get_executor());
+    auto executor = client_socket_.get_executor(); // получение executor'а
+    boost::asio::ip::tcp::resolver resolver(executor);
     boost::system::error_code ec;
-    auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(client_socket_.get_executor()); // сокет для соеденения с сервером
+    auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(executor); // сокет для соеденения с сервером
     auto finished = std::make_shared<std::atomic_bool>(false); // флаг завершения
     auto self = shared_from_this(); // shared_ptr для того чтобы объект не уничтожился
-    
+    auto timer = std::make_shared<Timer>(executor, PROXY_CONFIG.timeout_milliseconds);
+    timer->set_callback_func([upstream_ptr](){upstream_ptr->close();}); // колбэк для коннетка к серверу и резолвинга
+    timer->start(); // старт таймера
     auto results = co_await resolver.async_resolve(
         host, port, 
         boost::asio::redirect_error(boost::asio::use_awaitable, ec)); 
+    timer->refresh();
     co_await boost::asio::async_connect( // подключение к серверу
         *upstream_ptr, results, 
         boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    timer->refresh();
     if(ec)
     {
+        timer->stop();
 #ifdef DEBUG
         std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
 #endif
         co_await send_bad_request(ec.what());
         co_return;
     }
-    auto close_both = [self, upstream_ptr]() // закрытие обоих сокетов
+    auto close_both = [self, upstream_ptr, timer]() // закрытие обоих сокетов
     {
+        timer->stop();
         boost::system::error_code ec;
         self->client_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
         upstream_ptr->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
@@ -109,7 +119,7 @@ boost::asio::awaitable<void> Session::http_handler
     *request_str = oss.str();   // чтобы можно было контроллировать скольк байт передается
     
     // корутина для отправки запроса от клиента к серверу
-    auto client_to_server = [self, upstream_ptr, finished, close_both, request_str]() -> boost::asio::awaitable<void>
+    auto client_to_server = [self, upstream_ptr, finished, close_both, request_str, timer]() -> boost::asio::awaitable<void>
     {
         boost::system::error_code ec;
         auto bytes_transferred = request_str->size(); // размер в байтах всего request'а
@@ -128,6 +138,7 @@ boost::asio::awaitable<void> Session::http_handler
                 *upstream_ptr,
                 boost::asio::buffer(request_str->data() + offset, allowed),
                 boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            timer->refresh();
             if(ec)
                 break;
             offset += sent;
@@ -137,12 +148,12 @@ boost::asio::awaitable<void> Session::http_handler
         if(ec)
             std::cerr << "Error in client_to_server: " << ec.what() << std::endl;
 #endif
-        
+        timer->stop();
         if(!finished->exchange(true));
     };
 
     // корутина для отправки ответа клиенту от сервера
-    auto server_to_client = [self, upstream_ptr, finished, close_both]() -> boost::asio::awaitable<void>
+    auto server_to_client = [self, upstream_ptr, finished, close_both, timer]() -> boost::asio::awaitable<void>
     {
         boost::system::error_code ec;
         boost::beast::flat_buffer read_buffer;
@@ -153,12 +164,13 @@ boost::asio::awaitable<void> Session::http_handler
             read_buffer, 
             res,
             boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-        
+        timer->refresh();
         if(ec)  
         {
 #ifdef DEBUG
-        std::cerr << "Error reading response from upstream: " << ec.what() << std::endl;
+            std::cerr << "Error reading response from upstream: " << ec.what() << std::endl;
 #endif
+            timer->stop();
             if(!finished->exchange(true))
             co_return;
         }
@@ -168,6 +180,7 @@ boost::asio::awaitable<void> Session::http_handler
 #ifdef DEBUG
         std::cerr << "Error: HTTP response body too large!" << std::endl;
 #endif
+        timer->stop();
         if(!finished->exchange(true))
         co_return;
     }
@@ -191,6 +204,7 @@ boost::asio::awaitable<void> Session::http_handler
                 self->client_socket_,
                 boost::asio::buffer(response_str->data() + offset, allowed),
                 boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            timer->refresh();
             if(ec)
                 break;
             offset += sent;
@@ -199,23 +213,28 @@ boost::asio::awaitable<void> Session::http_handler
     if(ec)
         std::cerr << "Error in server_to_client: " << ec.what() << std::endl;
 #endif
+        timer->stop();
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
             close_both();
     };
+    timer->set_callback_func([finished](){finished->store(true);}); // колбэк для корутин
     co_await (boost::asio::experimental::awaitable_operators::operator&&(client_to_server(), server_to_client())); // запуск корутин
     co_return;
 }
 
 boost::asio::awaitable<void> Session::https_handler (const std::string& host, const std::string& port)
 {
-    boost::asio::ip::tcp::resolver resolver(client_socket_.get_executor());
+    auto executor = client_socket_.get_executor();
+    boost::asio::ip::tcp::resolver resolver(executor);
     boost::system::error_code ec;
-    auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(client_socket_.get_executor()); // сокет для соеденения с сервером
+    auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(executor); // сокет для соеденения с сервером
     auto finished = std::make_shared<std::atomic_bool>(false); // флаг завершения
     auto self = shared_from_this(); // shared_ptr, чтобы объект не уничтожился раньше чем надо
+    auto timer = std::make_shared<Timer>(executor, PROXY_CONFIG.timeout_milliseconds);
 
-    auto close_both = [self, upstream_ptr]() // закрытие обоих сокетов
+    auto close_both = [self, upstream_ptr, timer]() // закрытие обоих сокетов
     {
+        timer->stop();
         boost::system::error_code ec;
         self->client_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
         upstream_ptr->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
@@ -224,7 +243,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     };
 
     // корутина для отправки данных от клиента к серверу
-    auto client_to_server = [self, upstream_ptr, finished, close_both] -> boost::asio::awaitable<void>
+    auto client_to_server = [self, upstream_ptr, finished, close_both, timer] -> boost::asio::awaitable<void>
     {
         std::array<char, TUNNEL_BUFFER_SIZE> read_buffer_from_client; // буфер для чтения
         boost::system::error_code ec;
@@ -234,6 +253,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                 break;
             auto bytes_transferred = co_await self->client_socket_.async_read_some
             (boost::asio::buffer(read_buffer_from_client), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            timer->refresh(); // обновление таймера
             if(bytes_transferred == 0 || ec)
                 break;
             std::size_t offset = 0; // смещение в буфере
@@ -251,6 +271,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                 (*upstream_ptr,
                 boost::asio::buffer(read_buffer_from_client.data() + offset, allowed),
                 boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+                timer->refresh();
                 if(ec)
                     break;
                 offset += sent;
@@ -265,7 +286,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     };
 
     // корутина для отправки данных от сервера к клиенту
-    auto server_to_client = [self, upstream_ptr, finished, close_both]() -> boost::asio::awaitable<void>
+    auto server_to_client = [self, upstream_ptr, finished, close_both, timer]() -> boost::asio::awaitable<void>
     {
         std::array<char, TUNNEL_BUFFER_SIZE> read_buffer_from_server; // буфер для чтения
         boost::system::error_code ec;
@@ -275,6 +296,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                 break;
             auto bytes_transferred = co_await upstream_ptr->async_read_some
             (boost::asio::buffer(read_buffer_from_server), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+            timer->refresh();
             if(bytes_transferred == 0 || ec)
                 break;
             std::size_t offset = 0; // смещение в буфере
@@ -292,6 +314,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                 (self->client_socket_,
                 boost::asio::buffer(read_buffer_from_server.data() + offset, allowed),
                 boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+                timer->refresh();
                 if(ec)
                     break;
                 offset += sent;
@@ -304,12 +327,16 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
             close_both();
     };
-
+    timer->set_callback_func([upstream_ptr](){upstream_ptr->close();}); // колбэк для подключения и резолвинга
+    timer->start(); // запуск таймера
     auto results = co_await resolver.async_resolve(host, port, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    timer->refresh(); // обновление таймера
     // подключение к серверу
     co_await boost::asio::async_connect(*upstream_ptr, results, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    timer->refresh();
     if(ec)
     {
+        timer->stop();
 #ifdef DEBUG
         std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
 #endif
@@ -321,6 +348,8 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     res.prepare_payload();
     // отправка подтеврждения, что тунель установлен
     co_await boost::beast::http::async_write(client_socket_, res, boost::asio::use_awaitable);
+    timer->refresh();
+    timer->set_callback_func([finished](){finished->store(true);}); // колбэк для корутин
     // запуск корутин
     co_await (boost::asio::experimental::awaitable_operators::operator&&(client_to_server(), server_to_client()));
     co_return;
