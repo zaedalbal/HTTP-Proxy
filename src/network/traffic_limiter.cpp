@@ -1,10 +1,10 @@
 #include "network/traffic_limiter.hpp"
 
-Traffic_limiter::Traffic_limiter()
+Traffic_limiter::Traffic_limiter(uint64_t bytes_per_sec)
 {
-    max_tokens_ = 2 * 1024 * 1024; // 2 мб по дефолту
+    max_tokens_ = bytes_per_sec * 1.5; // 2 мб по дефолту
     tokens_ = max_tokens_;
-    rate_bytes_per_sec_ = 1.5 * 1024 * 1024; // 1.5 мб/сек по дефолту
+    rate_bytes_per_sec_ = bytes_per_sec; // 1.5 мб/сек по дефолту
     last_update_ = std::chrono::steady_clock::now();
 }
 

@@ -46,11 +46,12 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
             {
                 auto proxy = config["proxy"];
                 settings.max_connections = proxy["max_connections"].value_or(settings.max_connections);
-                settings.timeout_milliseconds = proxy["timeout_seсonds"].value_or(settings.timeout_milliseconds);
+                settings.timeout_milliseconds = proxy["timeout_milliseconds"].value_or(settings.timeout_milliseconds);
                 settings.host = proxy["host"].value_or(settings.host);
                 settings.port = static_cast<unsigned short>(proxy["port"].value_or(settings.port));
                 settings.log_on = proxy["log_on"].value_or(settings.log_on);
                 settings.log_file_name = proxy["log_file_name"].value_or(settings.log_file_name);
+                settings.max_bandwidth_per_sec = proxy["max_bandwidth_per_sec"].value_or(settings.max_bandwidth_per_sec);
             }
             if(!validate())
             {
@@ -74,7 +75,8 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 {"host", settings.host},
                 {"port", settings.port},
                 {"log_on", settings.log_on},
-                {"log_file_name", settings.log_file_name}
+                {"log_file_name", settings.log_file_name},
+                {"max_bandwidth_per_sec", settings.max_bandwidth_per_sec}
             });
             std::ofstream out_file(filename);
             out_file << config;

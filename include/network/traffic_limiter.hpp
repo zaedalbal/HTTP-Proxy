@@ -5,7 +5,7 @@
 class Traffic_limiter
 {
         public:
-                Traffic_limiter(); // конструктор
+                Traffic_limiter(uint64_t bytes_per_sec); // конструктор
 
                 std::size_t acquire(std::size_t want); // возвращает сколько байт можно переслать и уменьшает счетчик
 

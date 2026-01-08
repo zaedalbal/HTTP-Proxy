@@ -10,12 +10,15 @@ class Proxy_Config
         {
             int64_t max_connections = 256; // пока что не используется
             int64_t timeout_milliseconds = 10000;
+            // int64_t из за того что toml не хочет принимать std::size_t
 
             std::string host = "0.0.0.0"; // пока что не используется
             unsigned short port = 12345;
 
             bool log_on = false; // пока что не используется
             std::string log_file_name = "proxy.log"; // пока что не используется
+
+            int64_t max_bandwidth_per_sec = 1024 * 1024 * 2; // 2 мб/сек по дефолту
         };
         
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
