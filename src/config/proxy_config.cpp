@@ -10,27 +10,31 @@ Proxy_Config::Proxy_Config()
 
 bool Proxy_Config::validate() const
 {
+    bool error_flag = false;
     if(settings.max_connections < 1)
     {
         std::cerr << "Error in config: max_connection must be at lest 1" << std::endl;
-        return false;
+        error_flag = true;
     }
     if(settings.timeout_milliseconds <= 0 || settings.timeout_milliseconds > 600000)
     {
         std::cerr << "Error in config: timeout_milliseconds must be in range 1-600000" << std::endl;
-        return false;
+        error_flag = true;
     }
     if(settings.host.empty())
     {
         std::cerr << "Error in config: host cannot be empty" << std::endl;
-        return false;
+        error_flag = true;
     }
     if(settings.port < 1)
     {
         std::cerr << "Error in config: port must be greater than 0" << std::endl;
-        return false;
+        error_flag = true;
     }
-    return true;
+    if(error_flag)
+        return false;
+    else
+        return true;
 }
 
 void Proxy_Config::load_or_create_cfg(const std::string& filename)
