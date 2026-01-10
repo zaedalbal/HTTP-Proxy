@@ -151,5 +151,6 @@ docs/_build/
 core
 core.*
 
-#  Config files
+#  lib
+tomlplusplus/
 *.toml
