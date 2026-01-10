@@ -1,9 +1,13 @@
 #include "network/server.hpp"
 #include "network/session.hpp"
 #include "config/proxy_config.hpp"
+#include "logger/logger.hpp"
 #include <iostream>
 
+
 Proxy_Config::Proxy_Settings PROXY_CONFIG;
+Logger LOGGER;
+Logger DEBUG_LOGGER;
 
 int main(int argc, char** argv)
 {

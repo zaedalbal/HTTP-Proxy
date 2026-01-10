@@ -13,7 +13,7 @@ class Logger
     public:
         enum LOG_LEVEL{INFO, DEBUG};
 
-        Logger(const std::string& log_file_name, std::size_t rotation_size_bytes);
+        Logger() = default;
 
         template<typename T>
         Logger& operator<<(const T& data)
@@ -28,11 +28,11 @@ class Logger
             return *this;
         }
 
-
         void set_level(LOG_LEVEL log_level);
+
+        void init_logger(const std::string& log_file, std::size_t rotation_size);
     
     private:
-        void init_logger(const std::string& log_file, std::size_t rotation_size);
 
         void flush();
 

@@ -1,10 +1,5 @@
 #include "logger/logger.hpp"
 
-Logger::Logger(const std::string& log_file_name, std::size_t rotation_size_bytes) : log_level_(LOG_LEVEL::INFO)
-{
-    init_logger(log_file_name, rotation_size_bytes);
-}
-
 void Logger::set_level(LOG_LEVEL level)
 {
     log_level_ = level;
@@ -12,6 +7,7 @@ void Logger::set_level(LOG_LEVEL level)
 
 void Logger::init_logger(const std::string& log_file, std::size_t rotation_size)
 {
+    log_level_ = LOG_LEVEL::INFO;
     boost::log::add_file_log
     (
         boost::log::keywords::file_name = log_file,
