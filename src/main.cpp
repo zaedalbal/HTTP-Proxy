@@ -21,6 +21,9 @@ int main(int argc, char** argv)
                   << ":" << PROXY_CONFIG.port << "...\n";
         std::cout << "Max connections: " << PROXY_CONFIG.max_connections << "\n";
         std::cout << "Timeout: " << PROXY_CONFIG.timeout_milliseconds << " milliseconds\n";
+        std::cout << "Log on: " << PROXY_CONFIG.log_on << "\n";
+        std::cout << "Log file name: " << PROXY_CONFIG.log_file_name << "\n";
+        std::cout << "Log file size bytes: " << PROXY_CONFIG.log_file_size_bytes << "\n";
         std::cout << "Max_bandwidth_per_sec: " << PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
         
         boost::asio::io_context context;

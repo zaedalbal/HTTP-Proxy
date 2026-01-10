@@ -31,6 +31,16 @@ bool Proxy_Config::validate() const
         std::cerr << "Error in config: port must be greater than 0" << std::endl;
         error_flag = true;
     }
+    if(settings.log_file_name.empty())
+    {
+        std::cerr << "Error in config: log_file_name cannot be empty" << std::endl;
+        error_flag = true;
+    }
+    if(settings.log_file_size_bytes < 1)
+    {
+        std::cerr << "Error in config: log_file_size_bytes must be greater than 0" << std::endl;
+        error_flag = true;
+    }
     if(error_flag)
         return false;
     else
@@ -55,6 +65,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 settings.port = static_cast<unsigned short>(proxy["port"].value_or(settings.port));
                 settings.log_on = proxy["log_on"].value_or(settings.log_on);
                 settings.log_file_name = proxy["log_file_name"].value_or(settings.log_file_name);
+                settings.log_file_size_bytes = proxy["log_file_size_bytes"].value_or(settings.log_file_size_bytes);
                 settings.max_bandwidth_per_sec = proxy["max_bandwidth_per_sec"].value_or(settings.max_bandwidth_per_sec);
             }
             if(!validate())
@@ -80,6 +91,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 {"port", settings.port},
                 {"log_on", settings.log_on},
                 {"log_file_name", settings.log_file_name},
+                {"log_file_size_bytes", settings.log_file_size_bytes},
                 {"max_bandwidth_per_sec", settings.max_bandwidth_per_sec}
             });
             std::ofstream out_file(filename);
