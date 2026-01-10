@@ -1,4 +1,4 @@
-#include "include/logger/logger.hpp"
+#include "logger/logger.hpp"
 
 Logger::Logger(const std::string& log_file_name, std::size_t rotation_size_bytes) : log_level_(LOG_LEVEL::INFO)
 {
