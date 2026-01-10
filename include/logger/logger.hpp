@@ -25,6 +25,8 @@ class Logger
         {
             if(func == static_cast<std::ostream&(*)(std::ostream&)>(std::endl))
                 flush();
+            else
+                stream_ << func;
             return *this;
         }
 

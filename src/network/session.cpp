@@ -1,6 +1,7 @@
 #include "network/session.hpp"
 #include "network/analyze_request.hpp"
 #include "config/global_config.hpp"
+#include "logger/global_loggers.hpp"
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include "utils/timer.hpp"
 #include <iostream>
@@ -48,7 +49,7 @@ boost::asio::awaitable<void> Session::handle_request()
     catch(const std::exception& ex)
     {
 #ifdef DEBUG
-        std::cerr << "Exception in handle request: " << ex.what();
+        DEBUG_LOGGER << "Exception in handle request: " << ex.what();
 #endif
     }
 }
@@ -88,7 +89,7 @@ boost::asio::awaitable<void> Session::http_handler
     {
         timer->stop();
 #ifdef DEBUG
-        std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
+        DEBUG_LOGGER << "Error in connect to upstream: " << ec.what() << std::endl;
 #endif
         co_await send_bad_request(ec.what());
         co_return;
@@ -106,7 +107,7 @@ boost::asio::awaitable<void> Session::http_handler
     if(request.body().size() > MAX_BODY_SIZE) // если тело больше чем 64мб, послать BAD REQUEST и закрыть сокеты
     {
 #ifdef DEBUG
-        std::cerr << "Error: HTTP request body too large!" << std::endl;
+        DEBUG_LOGGER << "Error: HTTP request body too large!" << std::endl;
 #endif
         co_await send_bad_request("Error: HTTP request too large!");
         close_both();
@@ -146,7 +147,7 @@ boost::asio::awaitable<void> Session::http_handler
         
 #ifdef DEBUG
         if(ec)
-            std::cerr << "Error in client_to_server: " << ec.what() << std::endl;
+            DEBUG_LOGGER << "Error in client_to_server: " << ec.what() << std::endl;
 #endif
         timer->stop();
         if(!finished->exchange(true));
@@ -168,7 +169,7 @@ boost::asio::awaitable<void> Session::http_handler
         if(ec)  
         {
 #ifdef DEBUG
-            std::cerr << "Error reading response from upstream: " << ec.what() << std::endl;
+            DEBUG_LOGGER << "Error reading response from upstream: " << ec.what() << std::endl;
 #endif
             timer->stop();
             if(!finished->exchange(true))
@@ -178,7 +179,7 @@ boost::asio::awaitable<void> Session::http_handler
         if(res.body().size() > MAX_BODY_SIZE) // если тело больше чем 64мб, отправить BAD REQUEST
     {
 #ifdef DEBUG
-        std::cerr << "Error: HTTP response body too large!" << std::endl;
+        DEBUG_LOGGER << "Error: HTTP response body too large!" << std::endl;
 #endif
         timer->stop();
         if(!finished->exchange(true))
@@ -211,7 +212,7 @@ boost::asio::awaitable<void> Session::http_handler
         }
 #ifdef DEBUG
     if(ec)
-        std::cerr << "Error in server_to_client: " << ec.what() << std::endl;
+        DEBUG_LOGGER << "Error in server_to_client: " << ec.what() << std::endl;
 #endif
         timer->stop();
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
@@ -279,7 +280,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
         }
 #ifdef DEBUG
         if(ec)
-            std::cerr << "Error in client_to_server: " << ec.what() << std::endl;
+            DEBUG_LOGGER << "Error in client_to_server: " << ec.what() << std::endl;
 #endif
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
             close_both();
@@ -322,7 +323,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
         }
 #ifdef DEBUG
         if(ec)
-            std::cerr << "Error in server_to_client: " << ec.what() << std::endl;
+            DEBUG_LOGGER << "Error in server_to_client: " << ec.what() << std::endl;
 #endif
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
             close_both();
@@ -338,7 +339,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     {
         timer->stop();
 #ifdef DEBUG
-        std::cerr << "Error in connect to upstream: " << ec.what() << std::endl;
+        DEBUG_LOGGER << "Error in connect to upstream: " << ec.what() << std::endl;
 #endif
         co_await send_bad_request(ec.what());
         co_return;

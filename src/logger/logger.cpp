@@ -30,4 +30,5 @@ void Logger::flush()
     }
     stream_.str(""); // очистка
     stream_.clear();
+    boost::log::core::get()->flush();
 }

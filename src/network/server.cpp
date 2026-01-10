@@ -1,5 +1,6 @@
 #include "network/server.hpp"
 #include "network/session.hpp"
+#include "logger/global_loggers.hpp"
 #include <iostream>
 
 Server::Server(boost::asio::io_context& context, unsigned short port)
@@ -10,6 +11,8 @@ user_traffic_manager_(std::make_shared<User_traffic_manager>())
 
 boost::asio::awaitable<void> Server::run()
 {
+    if(LOG_ON)
+        LOGGER << "Starting server" << std::endl;
     co_await accept_connections();
 }
 
@@ -30,7 +33,7 @@ boost::asio::awaitable<void> Server::accept_connections()
         catch(const std::exception& ex)
         {
 #ifdef DEBUG
-            std::cout << "Exception in acception: " << ex.what() << std::endl;
+            DEBUG_LOGGER << "Exception in acception: " << ex.what() << std::endl;
 #endif
         }
     }

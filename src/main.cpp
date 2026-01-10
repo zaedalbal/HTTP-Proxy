@@ -6,8 +6,11 @@
 
 
 Proxy_Config::Proxy_Settings PROXY_CONFIG;
+bool LOG_ON;
 Logger LOGGER;
+#ifdef DEBUG
 Logger DEBUG_LOGGER;
+#endif
 
 int main(int argc, char** argv)
 {
@@ -16,6 +19,12 @@ int main(int argc, char** argv)
         // Загрузка конфигурации из proxy_config.toml
         Proxy_Config config;
         PROXY_CONFIG = config.get_settings();
+        LOG_ON = PROXY_CONFIG.log_on;
+        LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
+#ifdef DEBUG
+        DEBUG_LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
+        DEBUG_LOGGER.set_level(Logger::LOG_LEVEL::DEBUG);
+#endif
         
         std::cout << "Starting proxy server on " << PROXY_CONFIG.host 
                   << ":" << PROXY_CONFIG.port << "...\n";
