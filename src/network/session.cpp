@@ -35,6 +35,9 @@ boost::asio::awaitable<void> Session::handle_request()
         if(!ec) // если нет ошибки
         {
             auto result = HttpHandler::analyze_request(req); // анализ запроса
+            if(LOG_ON)
+                LOGGER << "Request from " << client_socket_.remote_endpoint().address() << ":\n" 
+                << req << std::endl;
             if(result.is_connect) // если CONNECT, то вызвать https_handler
             {
                 co_await https_handler(result.host, result.port);
@@ -62,6 +65,9 @@ boost::asio::awaitable<void> Session::send_bad_request(const std::string str)
     res.body() = str;
     res.prepare_payload();
     co_await boost::beast::http::async_write(client_socket_, res, boost::asio::use_awaitable);
+    if(LOG_ON)
+        LOGGER << "Send bad request to " << client_socket_.remote_endpoint().address() << ":\n" 
+        << res << std::endl;
     co_return;
 }
 

@@ -24,6 +24,8 @@ boost::asio::awaitable<void> Server::accept_connections()
         try
         {
             auto socket = co_await acceptor_.async_accept(boost::asio::use_awaitable);
+            if(LOG_ON)
+                LOGGER << "New connection: " << socket.remote_endpoint().address() << std::endl;
             auto session = std::make_shared<Session>(std::move(socket), user_traffic_manager_);
             boost::asio::co_spawn(io_context_, [session]()->boost::asio::awaitable<void>
             {

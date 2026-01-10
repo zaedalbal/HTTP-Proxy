@@ -22,7 +22,7 @@ class Logger
             return *this;
         }
         Logger& operator<<(std::ostream& (*func)(std::ostream&))
-        {
+        { // на будущее: на компиляторах отличных от gcc все может работать не так как надо (из за сравнения указателей)
             if(func == static_cast<std::ostream&(*)(std::ostream&)>(std::endl))
                 flush();
             else
