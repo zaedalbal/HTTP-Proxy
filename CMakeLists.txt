@@ -33,3 +33,14 @@ target_link_libraries(
     tomlplusplus::tomlplusplus
     ${Boost_LIBRARIES}
 )
+
+enable_testing()
+find_package(GTest REQUIRED)
+include(GoogleTest)
+file(GLOB_RECURSE SRC_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+list(FILTER SRC_SOURCES EXCLUDE REGEX ".*/main.cpp$")
+file(GLOB_RECURSE TEST_SOURCES ${CMAKE_SOURCE_DIR}/tests/unit_tests/*.cpp)
+add_executable(tests ${SRC_SOURCES} ${TEST_SOURCES})
+target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES})
+gtest_discover_tests(tests)

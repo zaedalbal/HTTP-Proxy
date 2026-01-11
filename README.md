@@ -17,6 +17,7 @@
 * **CMake 3.31+**
 * **Boost 1.82+**
   (используются `asio`, `beast`, `system`)
+* **Google Test** (для сборки и запуска тестов)
 * Git
 
 ### Установка зависимостей
@@ -24,19 +25,19 @@
 **Для Ubuntu/Debian:**
 
 ```bash
-sudo apt install git cmake g++ libboost-dev libboost-system-dev
+sudo apt install git cmake g++ libboost-dev libboost-system-dev libgtest-dev
 ```
 
 **Для Fedora:**
 
 ```bash
-sudo dnf install git cmake gcc-c++ boost-devel
+sudo dnf install git cmake gcc-c++ boost-devel gtest-devel
 ```
 
 **Для Arch Linux / Manjaro:**
 
 ```bash
-sudo pacman -S git cmake gcc boost
+sudo pacman -S git cmake gcc boost gtest
 ```
 
 ---
