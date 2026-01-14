@@ -90,7 +90,9 @@ cmake --build . --config Release
 
 ```text
 include/          # Заголовочные файлы
+lib/              # Библиотеки
 src/              # Исходные файлы
+tests/            # Тесты
 CMakeLists.txt    # Конфигурация сборки
 ```
 
