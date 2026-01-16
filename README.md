@@ -86,13 +86,33 @@ cmake --build . --config Release
 
 ---
 
+## Конфиг файл
+
+Конфиг файл создается в той же директории, что и исполняемый файл, при первом запуске
+
+Дефолтные значение в конфиг файле
+
+```bash
+[proxy]
+host = '0.0.0.0'
+log_file_name = 'proxy.log' # в логи записываются только заголовки
+log_file_size_bytes = 16777216
+log_on = false
+max_bandwidth_per_sec = 2097152
+max_connections = 256 # max connections на данный момент не используется
+port = 12345
+timeout_milliseconds = 10000
+```
+
+---
+
 ## Структура проекта
 
 ```text
 include/          # Заголовочные файлы
 lib/              # Библиотеки
 src/              # Исходные файлы
-tests/            # Тесты
+tests/            # Тесты (для запуска тестов: ctest -V)
 CMakeLists.txt    # Конфигурация сборки
 ```
 
