@@ -25,7 +25,7 @@
 **Для Ubuntu/Debian:**
 
 ```bash
-sudo apt install git cmake g++ libboost-dev libboost-system-dev libgtest-dev
+sudo apt install git cmake g++ libboost-dev libboost-system-dev libgtest-dev libboost-log-dev
 ```
 
 **Для Fedora:**
