@@ -38,6 +38,11 @@ boost::asio::awaitable<void> Session::handle_request()
             if(LOG_ON)
                 LOGGER << "Request from " << client_socket_.remote_endpoint().address() << ":\n" 
                 << req << std::endl;
+            if(result.is_blacklisted)
+            {
+                co_await send_bad_request("BLACKLISTED HOST");
+                co_return;
+            }
             if(result.is_connect) // если CONNECT, то вызвать https_handler
             {
                 co_await https_handler(result.host, result.port);
