@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_set>
 
 class Proxy_Config
 {
@@ -26,6 +27,8 @@ class Proxy_Config
         };
         
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
+
+        std::unordered_set<std::string> get_blacklisted_hosts() const;
 
     private:
         Proxy_Settings settings; // текущий конфиг

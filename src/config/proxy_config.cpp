@@ -120,3 +120,35 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
         std::cerr << "Using default settings" << std::endl;
     }
 }
+
+std::unordered_set<std::string> Proxy_Config::get_blacklisted_hosts() const
+{
+    std::unordered_set<std::string> blacklisted_hosts;
+    const auto filename = settings.blacklisted_hosts_file_name;
+    try
+    {
+        auto blacklist = toml::parse_file(filename);
+        if(blacklist["blacklist"] && blacklist["blacklist"]["hosts"])
+        {
+            auto hosts_array = blacklist["blacklist"]["hosts"].as_array();
+            for(const auto& i : *hosts_array)
+            {
+                if(i.is_string())
+                {
+                    blacklisted_hosts.insert(i.value_or(""));
+                }
+            }
+        }
+    }
+        catch(const toml::parse_error& err)
+    {
+        std::cerr << "TOML parsing error: " << err.what() << std::endl;
+        std::cerr << "Using default settings" << std::endl;
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "Error working with configuration: " << ex.what() << std::endl;
+        std::cerr << "Using default settings" << std::endl;
+    }
+    return blacklisted_hosts;
+}

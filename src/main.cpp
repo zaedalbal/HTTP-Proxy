@@ -3,11 +3,13 @@
 #include "config/proxy_config.hpp"
 #include "logger/logger.hpp"
 #include <iostream>
+#include <unordered_set>
 
 
 Proxy_Config::Proxy_Settings PROXY_CONFIG;
+std::unordered_set<std::string> BLACKLISTED_HOSTS; // глобальная хеш таблица, к которой идут обращения из других частей кода
 bool LOG_ON;
-Logger LOGGER;
+Logger LOGGER; // объект класса Logger, через который происходит взаимодействие с логами из других частей кода
 #ifdef DEBUG
 Logger DEBUG_LOGGER;
 #endif
@@ -19,9 +21,12 @@ int main(int argc, char** argv)
         // Загрузка конфигурации из proxy_config.toml
         Proxy_Config config;
         PROXY_CONFIG = config.get_settings();
+        if(PROXY_CONFIG.blacklist_on)
+            BLACKLISTED_HOSTS = config.get_blacklisted_hosts();
         LOG_ON = PROXY_CONFIG.log_on;
         LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
 #ifdef DEBUG
+        // Если объявлен DEBUG, происходит объекта класса Logger через который происходит взаимодействие с дебаг логами
         DEBUG_LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
         DEBUG_LOGGER.set_level(Logger::LOG_LEVEL::DEBUG);
 #endif
@@ -36,7 +41,19 @@ int main(int argc, char** argv)
         std::cout << "Max_bandwidth_per_sec: " << PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
         std::cout << "Blacklist_on: " << PROXY_CONFIG.blacklist_on << "\n";
         std::cout << "Blacklisted_hosts_file_name: " << PROXY_CONFIG.blacklisted_hosts_file_name << "\n";
-        
+        if(PROXY_CONFIG.blacklist_on)
+        {
+            if(!BLACKLISTED_HOSTS.empty())
+            {
+                std::cout << "Blacklisted hosts:\n";
+                for(const auto& i : BLACKLISTED_HOSTS)
+                {
+                    std::cout << "\t" << i << std::endl;
+                }
+            }
+            else
+                std::cout << "WARNING: Blacklist is enabled but no hosts were loaded!" << std::endl; 
+        }
         boost::asio::io_context context;
         auto server = std::make_shared<Server>(context, PROXY_CONFIG.port);
         
@@ -57,6 +74,6 @@ int main(int argc, char** argv)
         std::cerr << "\n!!!UNKNOWN EXCEPTION IN MAIN FUNC!!!\n";
         return 1;
     }
-    
+
     return 0;
 }

@@ -1,4 +1,5 @@
 #include "network/analyze_request.hpp"
+#include "config/global_config.hpp"
 
 HttpHandler::HandlerResult HttpHandler::analyze_request(const boost::beast::http::request<boost::beast::http::string_body>& req)
 {
@@ -35,5 +36,9 @@ HttpHandler::HandlerResult HttpHandler::analyze_request(const boost::beast::http
             result.port = "80";
         }
     }
+    if(BLACKLISTED_HOSTS.count(result.host))
+        result.is_blacklisted = true;
+    else
+        result.is_blacklisted = false;
     return result;
 }

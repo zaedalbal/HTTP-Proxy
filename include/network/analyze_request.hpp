@@ -7,6 +7,7 @@ class HttpHandler
     public:
         struct HandlerResult
         {
+            bool is_blacklisted; // проверка находится ли host в черном списке
             bool is_connect; // проверка на метод CONNECT
             std::string host; // имя хоста из запроса
             std::string port; // порт из запроса
