@@ -94,6 +94,8 @@ cmake --build . --config Release
 
 ```bash
 [proxy]
+blacklist_on = false
+blacklisted_hosts_file_name = 'blacklisted_hosts.toml'
 host = '0.0.0.0'
 log_file_name = 'proxy.log' # в логи записываются только заголовки
 log_file_size_bytes = 16777216
@@ -102,6 +104,17 @@ max_bandwidth_per_sec = 2097152
 max_connections = 256 # max connections на данный момент не используется
 port = 12345
 timeout_milliseconds = 10000
+```
+
+Формат черного списка
+
+```bash
+[blacklist]
+hosts = [
+    "rkn.gov.ru",
+    "max.ru",
+    "vk.com"
+]
 ```
 
 ---
