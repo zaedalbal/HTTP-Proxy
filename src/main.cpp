@@ -34,6 +34,8 @@ int main(int argc, char** argv)
         std::cout << "Log file name: " << PROXY_CONFIG.log_file_name << "\n";
         std::cout << "Log file size bytes: " << PROXY_CONFIG.log_file_size_bytes << "\n";
         std::cout << "Max_bandwidth_per_sec: " << PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
+        std::cout << "Blacklist_on: " << PROXY_CONFIG.blacklist_on << "\n";
+        std::cout << "Blacklisted_hosts_file_name: " << PROXY_CONFIG.blacklisted_hosts_file_name << "\n";
         
         boost::asio::io_context context;
         auto server = std::make_shared<Server>(context, PROXY_CONFIG.port);

@@ -13,7 +13,7 @@ bool Proxy_Config::validate() const
     bool error_flag = false;
     if(settings.max_connections < 1)
     {
-        std::cerr << "Error in config: max_connection must be at lest 1" << std::endl;
+        std::cerr << "Error in config: max_connection must be at least 1" << std::endl;
         error_flag = true;
     }
     if(settings.timeout_milliseconds <= 0 || settings.timeout_milliseconds > 600000)
@@ -39,6 +39,11 @@ bool Proxy_Config::validate() const
     if(settings.log_file_size_bytes < 1)
     {
         std::cerr << "Error in config: log_file_size_bytes must be greater than 0" << std::endl;
+        error_flag = true;
+    }
+    if(settings.blacklisted_hosts_file_name.empty())
+    {
+        std::cerr << "Error in config: blacklisted_hosts_file_name cannot be empty" << std::endl;
         error_flag = true;
     }
     if(error_flag)
@@ -67,6 +72,8 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 settings.log_file_name = proxy["log_file_name"].value_or(settings.log_file_name);
                 settings.log_file_size_bytes = proxy["log_file_size_bytes"].value_or(settings.log_file_size_bytes);
                 settings.max_bandwidth_per_sec = proxy["max_bandwidth_per_sec"].value_or(settings.max_bandwidth_per_sec);
+                settings.blacklist_on = proxy["blacklist_on"].value_or(settings.blacklist_on);
+                settings.blacklisted_hosts_file_name = proxy["blacklisted_hosts_file_name"].value_or(settings.blacklisted_hosts_file_name);
             }
             if(!validate())
             {
@@ -92,7 +99,9 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 {"log_on", settings.log_on},
                 {"log_file_name", settings.log_file_name},
                 {"log_file_size_bytes", settings.log_file_size_bytes},
-                {"max_bandwidth_per_sec", settings.max_bandwidth_per_sec}
+                {"max_bandwidth_per_sec", settings.max_bandwidth_per_sec},
+                {"blacklist_on", settings.blacklist_on},
+                {"blacklisted_hosts_file_name", settings.blacklisted_hosts_file_name}
             });
             std::ofstream out_file(filename);
             out_file << config;

@@ -20,6 +20,9 @@ class Proxy_Config
             int64_t log_file_size_bytes = 1024 * 1024 * 16; // 16 мб по дефолту
 
             int64_t max_bandwidth_per_sec = 1024 * 1024 * 2; // 2 мб/сек по дефолту
+
+            bool blacklist_on = false;
+            std::string blacklisted_hosts_file_name = "blacklisted_hosts.toml";
         };
         
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
