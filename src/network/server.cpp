@@ -11,8 +11,8 @@ user_traffic_manager_(std::make_shared<User_traffic_manager>())
 
 boost::asio::awaitable<void> Server::run()
 {
-    if(LOG_ON)
-        LOGGER << "Starting server" << std::endl;
+    if(__PROXY_GLOBALS__::LOG_ON)
+        __PROXY_GLOBALS__::LOGGER << "Starting server" << std::endl;
     co_await accept_connections();
 }
 
@@ -24,8 +24,8 @@ boost::asio::awaitable<void> Server::accept_connections()
         try
         {
             auto socket = co_await acceptor_.async_accept(boost::asio::use_awaitable);
-            if(LOG_ON)
-                LOGGER << "New connection: " << socket.remote_endpoint().address() << std::endl;
+            if(__PROXY_GLOBALS__::LOG_ON)
+                __PROXY_GLOBALS__::LOGGER << "New connection: " << socket.remote_endpoint().address() << std::endl;
             auto session = std::make_shared<Session>(std::move(socket), user_traffic_manager_);
             boost::asio::co_spawn(io_context_, [session]()->boost::asio::awaitable<void>
             {

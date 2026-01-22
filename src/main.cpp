@@ -6,48 +6,40 @@
 #include <iostream>
 #include <unordered_set>
 
-
-Proxy_Config::Proxy_Settings PROXY_CONFIG;
-std::unordered_set<std::string> BLACKLISTED_HOSTS; // глобальная хеш таблица, к которой идут обращения из других частей кода
-bool LOG_ON;
-Logger LOGGER; // объект класса Logger, через который происходит взаимодействие с логами из других частей кода
-#ifdef DEBUG
-Logger DEBUG_LOGGER;
-#endif
-
 int main(int argc, char** argv)
 {
     try
     {
         // Загрузка конфигурации из proxy_config.toml
         Proxy_Config config;
-        PROXY_CONFIG = config.get_settings();
-        if(PROXY_CONFIG.blacklist_on)
-            BLACKLISTED_HOSTS = config.get_blacklisted_hosts();
-        LOG_ON = PROXY_CONFIG.log_on;
-        LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
+        __PROXY_GLOBALS__::PROXY_CONFIG = config.get_settings();
+        if(__PROXY_GLOBALS__::PROXY_CONFIG.blacklist_on)
+            __PROXY_GLOBALS__::BLACKLISTED_HOSTS = config.get_blacklisted_hosts();
+        __PROXY_GLOBALS__::LOG_ON = __PROXY_GLOBALS__::PROXY_CONFIG.log_on;
+        __PROXY_GLOBALS__::LOGGER.init_logger(__PROXY_GLOBALS__::PROXY_CONFIG.log_file_name,
+        __PROXY_GLOBALS__::PROXY_CONFIG.log_file_size_bytes);
 #ifdef DEBUG
         // Если объявлен DEBUG, происходит объекта класса Logger через который происходит взаимодействие с дебаг логами
         DEBUG_LOGGER.init_logger(PROXY_CONFIG.log_file_name, PROXY_CONFIG.log_file_size_bytes);
         DEBUG_LOGGER.set_level(Logger::LOG_LEVEL::DEBUG);
 #endif
         
-        std::cout << "Starting proxy server on " << PROXY_CONFIG.host 
-                  << ":" << PROXY_CONFIG.port << "...\n";
-        std::cout << "Max connections: " << PROXY_CONFIG.max_connections << "\n";
-        std::cout << "Timeout: " << PROXY_CONFIG.timeout_milliseconds << " milliseconds\n";
-        std::cout << "Log on: " << PROXY_CONFIG.log_on << "\n";
-        std::cout << "Log file name: " << PROXY_CONFIG.log_file_name << "\n";
-        std::cout << "Log file size bytes: " << PROXY_CONFIG.log_file_size_bytes << "\n";
-        std::cout << "Max_bandwidth_per_sec: " << PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
-        std::cout << "Blacklist_on: " << PROXY_CONFIG.blacklist_on << "\n";
-        std::cout << "Blacklisted_hosts_file_name: " << PROXY_CONFIG.blacklisted_hosts_file_name << "\n";
-        if(PROXY_CONFIG.blacklist_on)
+        std::cout << "Starting proxy server on " << __PROXY_GLOBALS__::PROXY_CONFIG.host 
+                  << ":" << __PROXY_GLOBALS__::PROXY_CONFIG.port << "...\n";
+        std::cout << "Max connections: " << __PROXY_GLOBALS__::PROXY_CONFIG.max_connections << "\n";
+        std::cout << "Timeout: " << __PROXY_GLOBALS__::PROXY_CONFIG.timeout_milliseconds << " milliseconds\n";
+        std::cout << "Log on: " << __PROXY_GLOBALS__::PROXY_CONFIG.log_on << "\n";
+        std::cout << "Log file name: " << __PROXY_GLOBALS__::PROXY_CONFIG.log_file_name << "\n";
+        std::cout << "Log file size bytes: " << __PROXY_GLOBALS__::PROXY_CONFIG.log_file_size_bytes << "\n";
+        std::cout << "Max_bandwidth_per_sec: " << __PROXY_GLOBALS__::PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
+        std::cout << "Blacklist_on: " << __PROXY_GLOBALS__::PROXY_CONFIG.blacklist_on << "\n";
+        std::cout << "Blacklisted_hosts_file_name: " << __PROXY_GLOBALS__::PROXY_CONFIG.blacklisted_hosts_file_name << "\n";
+        if(__PROXY_GLOBALS__::PROXY_CONFIG.blacklist_on)
         {
-            if(!BLACKLISTED_HOSTS.empty())
+            if(!__PROXY_GLOBALS__::BLACKLISTED_HOSTS.empty())
             {
                 std::cout << "Blacklisted hosts:\n";
-                for(const auto& i : BLACKLISTED_HOSTS)
+                for(const auto& i : __PROXY_GLOBALS__::BLACKLISTED_HOSTS)
                 {
                     std::cout << "\t\"" << i << "\"" << std::endl;
                 }
@@ -56,7 +48,7 @@ int main(int argc, char** argv)
                 std::cout << "WARNING: Blacklist is enabled but no hosts were loaded!" << std::endl; 
         }
         boost::asio::io_context context;
-        auto server = std::make_shared<Server>(context, PROXY_CONFIG.port);
+        auto server = std::make_shared<Server>(context, __PROXY_GLOBALS__::PROXY_CONFIG.port);
         
         boost::asio::co_spawn(context, [server]() -> boost::asio::awaitable<void>
         {

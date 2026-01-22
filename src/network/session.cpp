@@ -34,8 +34,8 @@ boost::asio::awaitable<void> Session::handle_request()
         if(!ec) // если нет ошибки
         {
             auto result = HttpHandler::analyze_request(req); // анализ запроса
-            if(LOG_ON)
-                LOGGER << "Request from " << client_socket_.remote_endpoint().address() << ":\n" 
+            if(__PROXY_GLOBALS__::LOG_ON)
+                __PROXY_GLOBALS__::LOGGER << "Request from " << client_socket_.remote_endpoint().address() << ":\n" 
                 << req << std::endl;
             if(result.is_blacklisted)
             {
@@ -56,7 +56,7 @@ boost::asio::awaitable<void> Session::handle_request()
     catch(const std::exception& ex)
     {
 #ifdef DEBUG
-        DEBUG_LOGGER << "Exception in handle request: " << ex.what();
+        __PROXY_GLOBALS__::DEBUG_LOGGER << "Exception in handle request: " << ex.what();
 #endif
     }
 }
@@ -69,8 +69,8 @@ boost::asio::awaitable<void> Session::send_bad_request(const std::string str)
     res.body() = str;
     res.prepare_payload();
     co_await boost::beast::http::async_write(client_socket_, res, boost::asio::use_awaitable);
-    if(LOG_ON)
-        LOGGER << "Send bad request to " << client_socket_.remote_endpoint().address() << ":\n" 
+    if(__PROXY_GLOBALS__::LOG_ON)
+        __PROXY_GLOBALS__::LOGGER << "Send bad request to " << client_socket_.remote_endpoint().address() << ":\n" 
         << res << std::endl;
     co_return;
 }
@@ -84,7 +84,7 @@ boost::asio::awaitable<void> Session::http_handler
     auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(executor); // сокет для соеденения с сервером
     auto finished = std::make_shared<std::atomic_bool>(false); // флаг завершения
     auto self = shared_from_this(); // shared_ptr для того чтобы объект не уничтожился
-    auto timer = std::make_shared<Timer>(executor, PROXY_CONFIG.timeout_milliseconds);
+    auto timer = std::make_shared<Timer>(executor, __PROXY_GLOBALS__::PROXY_CONFIG.timeout_milliseconds);
     timer->set_callback_func([upstream_ptr](){upstream_ptr->close();}); // колбэк для коннетка к серверу и резолвинга
     timer->start(); // старт таймера
     auto results = co_await resolver.async_resolve(
@@ -189,7 +189,7 @@ boost::asio::awaitable<void> Session::http_handler
         if(res.body().size() > MAX_BODY_SIZE) // если тело больше чем 64мб, отправить BAD REQUEST
     {
 #ifdef DEBUG
-        DEBUG_LOGGER << "Error: HTTP response body too large!" << std::endl;
+        __PROXY_GLOBALS__::DEBUG_LOGGER << "Error: HTTP response body too large!" << std::endl;
 #endif
         timer->stop();
         if(!finished->exchange(true))
@@ -222,7 +222,7 @@ boost::asio::awaitable<void> Session::http_handler
         }
 #ifdef DEBUG
     if(ec)
-        DEBUG_LOGGER << "Error in server_to_client: " << ec.what() << std::endl;
+        __PROXY_GLOBALS__::DEBUG_LOGGER << "Error in server_to_client: " << ec.what() << std::endl;
 #endif
         timer->stop();
         if(!finished->exchange(true)) // если данная корутина завершилась первой, то закрыть сокеты
@@ -241,7 +241,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     auto upstream_ptr = std::make_shared<boost::asio::ip::tcp::socket>(executor); // сокет для соеденения с сервером
     auto finished = std::make_shared<std::atomic_bool>(false); // флаг завершения
     auto self = shared_from_this(); // shared_ptr, чтобы объект не уничтожился раньше чем надо
-    auto timer = std::make_shared<Timer>(executor, PROXY_CONFIG.timeout_milliseconds);
+    auto timer = std::make_shared<Timer>(executor, __PROXY_GLOBALS__::PROXY_CONFIG.timeout_milliseconds);
 
     auto close_both = [self, upstream_ptr, timer]() // закрытие обоих сокетов
     {
