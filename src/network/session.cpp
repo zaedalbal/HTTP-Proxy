@@ -1,7 +1,6 @@
 #include "network/session.hpp"
 #include "network/analyze_request.hpp"
-#include "config/global_config.hpp"
-#include "logger/global_loggers.hpp"
+#include "globals/globals.hpp"
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include "utils/timer.hpp"
 #include <iostream>

@@ -2,6 +2,7 @@
 #include "network/session.hpp"
 #include "config/proxy_config.hpp"
 #include "logger/logger.hpp"
+#include "globals/globals.hpp"
 #include <iostream>
 #include <unordered_set>
 

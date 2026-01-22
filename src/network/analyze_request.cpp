@@ -1,5 +1,5 @@
 #include "network/analyze_request.hpp"
-#include "config/global_config.hpp"
+#include "globals/globals.hpp"
 
 HttpHandler::HandlerResult HttpHandler::analyze_request(const boost::beast::http::request<boost::beast::http::string_body>& req)
 {

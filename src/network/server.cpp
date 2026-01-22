@@ -1,6 +1,6 @@
 #include "network/server.hpp"
 #include "network/session.hpp"
-#include "logger/global_loggers.hpp"
+#include "globals/globals.hpp"
 #include <iostream>
 
 Server::Server(boost::asio::io_context& context, unsigned short port)
