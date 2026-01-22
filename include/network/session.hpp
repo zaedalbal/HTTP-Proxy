@@ -11,6 +11,8 @@ class Session : public std::enable_shared_from_this<Session>
 {
     public:
         Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<User_traffic_manager> manager); // конструктор
+
+        ~Session(); // деструктор
         
         boost::asio::awaitable<void> start_session(); // начало сессии
     private:

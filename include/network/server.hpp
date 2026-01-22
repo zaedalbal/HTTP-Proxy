@@ -22,5 +22,7 @@ class Server : public std::enable_shared_from_this<Server>
 
         boost::asio::ip::tcp::acceptor acceptor_; // acceptor для приема соеденений
 
-        std::shared_ptr<User_traffic_manager> user_traffic_manager_;
+        std::shared_ptr<User_traffic_manager> user_traffic_manager_; // объект для контроля трафика
+
+        void wait_connection_slot(); // метод для ожидания свободного слота при подключении
 };

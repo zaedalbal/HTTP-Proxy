@@ -1,4 +1,5 @@
 #include "network/traffic_limiter.hpp"
+#include "globals/globals.hpp"
 
 Traffic_limiter::Traffic_limiter(uint64_t bytes_per_sec)
 {

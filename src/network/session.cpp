@@ -22,6 +22,9 @@ boost::asio::awaitable<void> Session::start_session() // старт сессии
     co_await handle_request(); // запуск обработчика request'ов
 }
 
+Session::~Session()
+{}
+
 boost::asio::awaitable<void> Session::handle_request()
 {
     try

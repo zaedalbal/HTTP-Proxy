@@ -23,6 +23,7 @@ boost::asio::awaitable<void> Server::accept_connections()
     {
         try
         {
+            wait_connection_slot();
             auto socket = co_await acceptor_.async_accept(boost::asio::use_awaitable);
             if(__PROXY_GLOBALS__::LOG_ON)
                 __PROXY_GLOBALS__::LOGGER << "New connection: " << socket.remote_endpoint().address() << std::endl;
@@ -39,4 +40,11 @@ boost::asio::awaitable<void> Server::accept_connections()
 #endif
         }
     }
+}
+
+void Server::wait_connection_slot()
+{
+    std::unique_lock<std::mutex> lock(__PROXY_GLOBALS__::ACTIVE_CONNECTIONS_MUTEX);
+    __PROXY_GLOBALS__::ACTIVE_CONNECTIONS_COND_VAR.wait(lock,[]
+    {return __PROXY_GLOBALS__::ACTIVE_CONNECTIONS < __PROXY_GLOBALS__::PROXY_CONFIG.max_connections;});
 }

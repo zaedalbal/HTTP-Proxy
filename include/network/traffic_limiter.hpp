@@ -10,6 +10,7 @@ class Traffic_limiter
                 std::size_t acquire(std::size_t want); // возвращает сколько байт можно переслать и уменьшает счетчик
 
                 void refill(); // обновляет счетчик байт
+                
         private:
                 std::size_t max_tokens_; // максимальное кол-во байт
 
