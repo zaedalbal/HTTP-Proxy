@@ -36,9 +36,6 @@ HttpHandler::HandlerResult HttpHandler::analyze_request(const boost::beast::http
             result.port = "80";
         }
     }
-    if(BLACKLISTED_HOSTS.count(result.host))
-        result.is_blacklisted = true;
-    else
-        result.is_blacklisted = false;
+    result.is_blacklisted = BLACKLISTED_HOSTS.count(result.host);
     return result;
 }

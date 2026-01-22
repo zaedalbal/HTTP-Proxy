@@ -48,7 +48,7 @@ int main(int argc, char** argv)
                 std::cout << "Blacklisted hosts:\n";
                 for(const auto& i : BLACKLISTED_HOSTS)
                 {
-                    std::cout << "\t" << i << std::endl;
+                    std::cout << "\t\"" << i << "\"" << std::endl;
                 }
             }
             else
