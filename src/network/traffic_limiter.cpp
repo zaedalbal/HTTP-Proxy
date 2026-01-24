@@ -3,6 +3,7 @@
 
 Traffic_limiter::Traffic_limiter(uint64_t bytes_per_sec)
 {
+    __PROXY_GLOBALS__::ACTIVE_CONNECTIONS++;
     max_tokens_ = bytes_per_sec * 1.5; // 2 мб по дефолту
     tokens_ = max_tokens_;
     rate_bytes_per_sec_ = bytes_per_sec; // 1.5 мб/сек по дефолту
@@ -24,4 +25,9 @@ std::size_t Traffic_limiter::acquire(std::size_t want)
     std::size_t allowed = std::min(tokens_, want);
     tokens_ -= allowed;
     return allowed;
+}
+
+Traffic_limiter::~Traffic_limiter()
+{
+    __PROXY_GLOBALS__::ACTIVE_CONNECTIONS--;
 }

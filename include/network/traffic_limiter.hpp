@@ -7,6 +7,8 @@ class Traffic_limiter
         public:
                 Traffic_limiter(uint64_t bytes_per_sec); // конструктор
 
+                ~Traffic_limiter(); // деструктор
+
                 std::size_t acquire(std::size_t want); // возвращает сколько байт можно переслать и уменьшает счетчик
 
                 void refill(); // обновляет счетчик байт

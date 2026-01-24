@@ -8,6 +8,10 @@
 class User_traffic_manager
 {
     public:
+        User_traffic_manager(); // конструктор
+
+        ~User_traffic_manager(); // деструктор
+
         std::shared_ptr<Traffic_limiter> get_or_create_user(const std::string& ip);
 
     private:
