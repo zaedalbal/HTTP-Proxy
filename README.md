@@ -4,7 +4,7 @@
 
 Поддерживается:
 
-* HTTP/1.1 проксирование
+* HTTP/1.1 проксирование первого запроса, затем тунелирование
 * HTTPS через метод `CONNECT` (туннелирование)
 
 ---
@@ -39,6 +39,8 @@ sudo dnf install git cmake gcc-c++ boost-devel gtest-devel
 ```bash
 sudo pacman -S git cmake gcc boost gtest
 ```
+
+(если ваша версия CMake < 3.31, вы можете попробовать поменять CMakeLists.txt)
 
 ---
 
@@ -101,7 +103,7 @@ log_file_name = 'proxy.log' # в логи записываются только 
 log_file_size_bytes = 16777216
 log_on = false
 max_bandwidth_per_sec = 2097152
-max_connections = 256 # max connections на данный момент не используется
+max_connections = 256
 port = 12345
 timeout_milliseconds = 10000
 ```
