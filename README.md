@@ -117,6 +117,38 @@ hosts = [
 ]
 ```
 
+Для изменения черного списка используйте скрипт:
+
+```bash
+blacklist-editor.sh
+```
+
+Как пользоваться blacklist-editor.sh:
+
+```bash
+blacklist-editor.sh --help
+
+Usage:
+  ./blacklist-editor.sh <file> add <host>
+  ./blacklist-editor.sh <file> remove <host>
+  ./blacklist-editor.sh <file> check <host>
+  ./blacklist-editor.sh <file> list
+  ./blacklist-editor.sh --help
+
+Description:
+  Utility for managing blacklist hosts in TOML format.
+
+Arguments:
+  <file>    Path to blacklisted_hosts.toml
+  <host>    Domain name (e.g. example.com)
+
+Commands:
+  add       Add host to blacklist
+  remove    Remove host from blacklist
+  check     Check if host exists in blacklist
+  list      List all blacklisted hosts
+```
+
 ---
 
 ## Использование прокси
