@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.31)
 project(proxy)
 
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-endif()
+option(BUILD_PROXY_SERVER "Build the proxy server" ON)
+option(BUILD_ADMIN_PANEL "Build the admin panel" ON)
 
 include(FetchContent)
 set(TOML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/tomlplusplus)
@@ -15,32 +14,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(API_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/api/include)
 
-find_package(Boost REQUIRED COMPONENTS log log_setup filesystem system thread)
+if(BUILD_PROXY_SERVER)
+    add_subdirectory(proxy_server)
+endif()
 
-file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
-
-add_executable(proxy ${PROJECT_SOURCES})
-
-target_include_directories(
-    proxy PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
-)
-target_link_libraries(
-    proxy PRIVATE
-    tomlplusplus::tomlplusplus
-    ${Boost_LIBRARIES}
-)
-
-enable_testing()
-find_package(GTest REQUIRED)
-include(GoogleTest)
-file(GLOB_RECURSE SRC_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
-list(FILTER SRC_SOURCES EXCLUDE REGEX ".*/main.cpp$")
-file(GLOB_RECURSE TEST_SOURCES ${CMAKE_SOURCE_DIR}/tests/unit_tests/*.cpp)
-add_executable(tests ${SRC_SOURCES} ${TEST_SOURCES})
-target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES})
-gtest_discover_tests(tests)
+if(BUILD_ADMIN_PANEL)
+    add_subdirectory(admin_panel)
+endif()
