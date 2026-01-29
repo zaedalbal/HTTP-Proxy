@@ -5,7 +5,7 @@
 #include <memory>
 #include <chrono>
 
-#define TUNNEL_BUFFER_SIZE 16184
+#define TUNNEL_BUFFER_SIZE 16384
 
 class Session : public std::enable_shared_from_this<Session>
 {

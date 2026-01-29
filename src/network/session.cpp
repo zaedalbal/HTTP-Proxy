@@ -88,6 +88,7 @@ boost::asio::awaitable<void> Session::http_handler
     auto finished = std::make_shared<std::atomic_bool>(false);
     auto self_weak = weak_from_this();
     auto timer = std::make_shared<Timer>(executor, __PROXY_GLOBALS__::PROXY_CONFIG.timeout_milliseconds);
+    auto wait_tokens_timer = std::make_shared<boost::asio::steady_timer>(client_socket_.get_executor()); // таймер для ожидания токенов
     
     auto close_both = [self_weak, upstream_ptr, timer]()
     {
@@ -149,7 +150,7 @@ boost::asio::awaitable<void> Session::http_handler
     timer->set_callback_func([finished](){finished->store(true);});
 
     // корутина для чтения от сервера и отправки клиенту
-    auto server_to_client = [self_weak, upstream_ptr, finished, close_both, timer]() -> boost::asio::awaitable<void>
+    auto server_to_client = [self_weak, upstream_ptr, finished, close_both, timer, wait_tokens_timer]() -> boost::asio::awaitable<void>
     {
         if(auto self = self_weak.lock())
         {
@@ -170,9 +171,8 @@ boost::asio::awaitable<void> Session::http_handler
                     auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
                     if(allowed == 0)
                     {
-                        boost::asio::steady_timer wait_timer(self->client_socket_.get_executor());
-                        wait_timer.expires_after(std::chrono::milliseconds(10));
-                        co_await wait_timer.async_wait(boost::asio::use_awaitable);
+                        wait_tokens_timer->expires_after(std::chrono::milliseconds(10));
+                        co_await wait_tokens_timer->async_wait(boost::asio::use_awaitable);
                         continue;
                     }
                     
@@ -200,7 +200,7 @@ boost::asio::awaitable<void> Session::http_handler
     };
 
     // корутина для чтения от клиента и отправки серверу
-    auto client_to_server = [self_weak, upstream_ptr, finished, close_both, timer]() -> boost::asio::awaitable<void>
+    auto client_to_server = [self_weak, upstream_ptr, finished, close_both, timer, wait_tokens_timer]() -> boost::asio::awaitable<void>
     {
         if(auto self = self_weak.lock())
         {
@@ -221,9 +221,8 @@ boost::asio::awaitable<void> Session::http_handler
                     auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
                     if(allowed == 0)
                     {
-                        boost::asio::steady_timer wait_timer(self->client_socket_.get_executor());
-                        wait_timer.expires_after(std::chrono::milliseconds(10));
-                        co_await wait_timer.async_wait(boost::asio::use_awaitable);
+                        wait_tokens_timer->expires_after(std::chrono::milliseconds(10));
+                        co_await wait_tokens_timer->async_wait(boost::asio::use_awaitable);
                         continue;
                     }
                     auto sent = co_await boost::asio::async_write
@@ -260,6 +259,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     auto finished = std::make_shared<std::atomic_bool>(false); // флаг завершения
     auto self_weak = weak_from_this(); // shared_ptr, чтобы объект не уничтожился раньше чем надо
     auto timer = std::make_shared<Timer>(executor, __PROXY_GLOBALS__::PROXY_CONFIG.timeout_milliseconds);
+    auto wait_tokens_timer = std::make_shared<boost::asio::steady_timer>(client_socket_.get_executor()); // таймер для ожидания токенов
 
     auto close_both = [self_weak, upstream_ptr, timer]() // закрытие обоих сокетов
     {
@@ -277,7 +277,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     };
 
     // корутина для отправки данных от клиента к серверу
-    auto client_to_server = [self_weak, upstream_ptr, finished, close_both, timer] -> boost::asio::awaitable<void>
+    auto client_to_server = [self_weak, upstream_ptr, finished, close_both, timer, wait_tokens_timer] -> boost::asio::awaitable<void>
     {
         if(auto self = self_weak.lock())
         {
@@ -298,9 +298,8 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                     auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
                     if(allowed == 0) // ждать 10 мс пока токены не обновятся
                     {
-                        boost::asio::steady_timer timer(self->client_socket_.get_executor());
-                        timer.expires_after(std::chrono::milliseconds(10));
-                        co_await timer.async_wait(boost::asio::use_awaitable);
+                        wait_tokens_timer->expires_after(std::chrono::milliseconds(10));
+                        co_await wait_tokens_timer->async_wait(boost::asio::use_awaitable);
                         continue;
                     }
                     auto sent = co_await boost::asio::async_write
@@ -325,7 +324,7 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
     };
 
     // корутина для отправки данных от сервера к клиенту
-    auto server_to_client = [self_weak, upstream_ptr, finished, close_both, timer]() -> boost::asio::awaitable<void>
+    auto server_to_client = [self_weak, upstream_ptr, finished, close_both, timer, wait_tokens_timer]() -> boost::asio::awaitable<void>
     {
         if(auto self = self_weak.lock())
         {
@@ -346,9 +345,8 @@ boost::asio::awaitable<void> Session::https_handler (const std::string& host, co
                     auto allowed = self->traffic_limiter_->acquire(bytes_transferred - offset);
                     if(allowed == 0) // ждать 10 мс пока токены не обновятся
                     {
-                        boost::asio::steady_timer timer(self->client_socket_.get_executor());
-                        timer.expires_after(std::chrono::milliseconds(10));
-                        co_await timer.async_wait(boost::asio::use_awaitable);
+                        wait_tokens_timer->expires_after(std::chrono::milliseconds(10));
+                        co_await wait_tokens_timer->async_wait(boost::asio::use_awaitable);
                         continue;
                     }
                     auto sent = co_await boost::asio::async_write
