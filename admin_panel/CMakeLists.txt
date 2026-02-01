@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
+set(CMAKE_AUTOMOC ON)
+
 target_include_directories(proxy PRIVATE ${API_INCLUDE_DIR})
 
 file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
