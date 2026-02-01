@@ -10,7 +10,10 @@ set(CMAKE_AUTOMOC ON)
 
 target_include_directories(proxy PRIVATE ${API_INCLUDE_DIR})
 
-file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp # !!!!!!!!!БЕЗ ЭТОЙ СТРОКИ ВСЕ ПАДАЕТ!!!!!!!!!
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+) 
 
 add_executable(admin_panel ${PROJECT_SOURCES})
 
