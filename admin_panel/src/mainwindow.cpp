@@ -27,6 +27,7 @@ void MainWindow::setupUI()
     Central = new QWidget(this);
     setCentralWidget(Central);
     setWindowTitle("Proxy control panel");
+    resize(1200, 600);
     CentralLayout = new QHBoxLayout(Central);
     
     // настройка меню
@@ -37,9 +38,12 @@ void MainWindow::setupUI()
 
     // настройка страниц
     Pages = new QStackedWidget;
-    LogPage = new QLabel("LogPage");
-    ConfigPage = new QLabel("ConfigPage");
-    ActiveConnectionsPage = new QLabel("ActiveConnectionsPage");
+    LogPage = new QWidget;
+    ConfigPage = new QWidget;
+    ActiveConnectionsPage = new QWidget;
+    LogPage_Layout = new QVBoxLayout(LogPage);
+    ConfigPage_Layout = new QVBoxLayout(ConfigPage);
+    ActiveConnectionsPage_Layout = new QVBoxLayout(ActiveConnectionsPage);
     Pages->addWidget(LogPage);
     Pages->addWidget(ConfigPage);
     Pages->addWidget(ActiveConnectionsPage);

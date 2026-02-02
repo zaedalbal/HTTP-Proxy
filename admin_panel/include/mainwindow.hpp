@@ -25,7 +25,6 @@ class MainWindow : public QMainWindow
         MainWindow(QWidget* parent = nullptr); // constructor
         ~MainWindow(); // destructor
 
-        void setupUI();
     private:
         // основное окно
         QWidget* Central; 
@@ -36,10 +35,17 @@ class MainWindow : public QMainWindow
 
         // страницы
         QStackedWidget* Pages; 
-        QLabel* LogPage;
-        QLabel* ConfigPage;
-        QLabel* ActiveConnectionsPage;
+        QWidget* LogPage;
+        QWidget* ConfigPage;
+        QWidget* ActiveConnectionsPage;
+        QVBoxLayout* LogPage_Layout;
+        QVBoxLayout* ConfigPage_Layout;
+        QVBoxLayout* ActiveConnectionsPage_Layout;
 
         // сплитер (для изменения размера меню и страниц)
         QSplitter* Splitter;
+
+    private:
+        void setupUI();
+        void pages_setup();
 };
