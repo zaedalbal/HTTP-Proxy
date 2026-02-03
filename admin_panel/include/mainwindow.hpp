@@ -16,6 +16,9 @@
 #include <QCheckBox>
 #include <QListWidget>
 #include <QStackedWidget>
+#include "pages/ActiveConnectionsPage/ActiveConnectionsPageWidget.hpp"
+#include "pages/ConfigPage/ConfigPageWidget.hpp"
+#include "pages/LogPage/LogPageWidget.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -34,13 +37,10 @@ class MainWindow : public QMainWindow
         QListWidget* Menu; 
 
         // страницы
-        QStackedWidget* Pages; 
-        QWidget* LogPage;
-        QWidget* ConfigPage;
-        QWidget* ActiveConnectionsPage;
-        QVBoxLayout* LogPage_Layout;
-        QVBoxLayout* ConfigPage_Layout;
-        QVBoxLayout* ActiveConnectionsPage_Layout;
+        QStackedWidget* Pages;
+        ActiveConnectionsPageWidget* ActiveConnectionsPage;
+        ConfigPageWidget* ConfigPage;
+        LogPageWidget* LogPage;
 
         // сплитер (для изменения размера меню и страниц)
         QSplitter* Splitter;

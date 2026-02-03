@@ -32,21 +32,19 @@ void MainWindow::setupUI()
     
     // настройка меню
     Menu = new QListWidget;
-    Menu->addItem("Log");
-    Menu->addItem("Config");
     Menu->addItem("Active connections");
+    Menu->addItem("Config");
+    Menu->addItem("Log");
 
     // настройка страниц
-    Pages = new QStackedWidget;
-    LogPage = new QWidget;
-    ConfigPage = new QWidget;
-    ActiveConnectionsPage = new QWidget;
-    LogPage_Layout = new QVBoxLayout(LogPage);
-    ConfigPage_Layout = new QVBoxLayout(ConfigPage);
-    ActiveConnectionsPage_Layout = new QVBoxLayout(ActiveConnectionsPage);
-    Pages->addWidget(LogPage);
-    Pages->addWidget(ConfigPage);
+    Pages = new QStackedWidget(Central);
+    ActiveConnectionsPage = new ActiveConnectionsPageWidget;
+    ConfigPage = new ConfigPageWidget;
+    LogPage = new LogPageWidget;
+
     Pages->addWidget(ActiveConnectionsPage);
+    Pages->addWidget(ConfigPage);
+    Pages->addWidget(LogPage);
 
     // настройка сплиттера
     connect(Menu, &QListWidget::currentRowChanged, Pages, &QStackedWidget::setCurrentIndex);
