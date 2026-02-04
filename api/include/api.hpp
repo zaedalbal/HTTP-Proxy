@@ -15,6 +15,8 @@ namespace api
 
     enum class CommandName
     {
+        AuthenticationRequest,
+
         Proxy_status,
         Proxy_activeconnections,
         
@@ -31,7 +33,8 @@ namespace api
 
     struct Request
     {
-        MessageType Type = api::MessageType::Response;
+        MessageType Type = api::MessageType::Request;
+        CommandName Command;
     };
 
     struct Response
