@@ -17,6 +17,7 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include "pages/ActiveConnectionsPage/ActiveConnectionsPageWidget.hpp"
+#include "pages/AuthenticationPage/AuthenticationPageWidget.hpp"
 #include "pages/ConfigPage/ConfigPageWidget.hpp"
 #include "pages/LogPage/LogPageWidget.hpp"
 
@@ -39,6 +40,7 @@ class MainWindow : public QMainWindow
         // страницы
         QStackedWidget* Pages;
         ActiveConnectionsPageWidget* ActiveConnectionsPage;
+        AuthenticationPageWidget* AuthenticationPage;
         ConfigPageWidget* ConfigPage;
         LogPageWidget* LogPage;
 
@@ -46,6 +48,10 @@ class MainWindow : public QMainWindow
         QSplitter* Splitter;
 
     private:
-        void setupUI();
-        void pages_setup();
+        void initialSetup();
+        void setupMainUI();
+    
+    private slots:
+        void onLoginSuccess();
+
 };

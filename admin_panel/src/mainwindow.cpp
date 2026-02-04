@@ -18,10 +18,10 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     std::cout << "constructor called\n";
-    setupUI();
+    initialSetup();
 } 
 
-void MainWindow::setupUI()
+void MainWindow::initialSetup()
 {
     // настройка главного окна
     Central = new QWidget(this);
@@ -29,7 +29,14 @@ void MainWindow::setupUI()
     setWindowTitle("Proxy control panel");
     resize(1200, 600);
     CentralLayout = new QHBoxLayout(Central);
-    
+    AuthenticationPage = new AuthenticationPageWidget(Central);
+    connect(AuthenticationPage, &AuthenticationPageWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
+    AuthenticationPage->startSetupUI();
+}
+
+void MainWindow::setupMainUI()
+{
+    std::cout << "Setup mainUI\n";
     // настройка меню
     Menu = new QListWidget;
     Menu->addItem("Active connections");
@@ -39,6 +46,7 @@ void MainWindow::setupUI()
     // настройка страниц
     Pages = new QStackedWidget(Central);
     ActiveConnectionsPage = new ActiveConnectionsPageWidget;
+    AuthenticationPage = new AuthenticationPageWidget;
     ConfigPage = new ConfigPageWidget;
     LogPage = new LogPageWidget;
 
@@ -55,6 +63,11 @@ void MainWindow::setupUI()
     Splitter->setStretchFactor(1, 1);
     Splitter->setSizes({200, 700});
     CentralLayout->addWidget(Splitter);
+}
+
+void MainWindow::onLoginSuccess()
+{
+    setupMainUI();
 }
 
 MainWindow::~MainWindow()
