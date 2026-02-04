@@ -24,4 +24,3 @@ bool AuthenticationPageWidget::getAuthenticationStatus()
 {
     return isAuthenticated_;
 }
-
