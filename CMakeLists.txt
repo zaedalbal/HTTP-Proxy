@@ -14,8 +14,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
-set(API_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/api/include)
-
 if(BUILD_PROXY_SERVER)
     add_subdirectory(proxy_server)
 endif()

@@ -13,9 +13,8 @@ add_executable(proxy ${PROJECT_SOURCES})
 target_include_directories(
     proxy PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/api/include
 )
-
-target_include_directories(proxy PRIVATE ${API_INCLUDE_DIR})
 
 target_link_libraries(
     proxy PRIVATE
@@ -30,6 +29,13 @@ file(GLOB_RECURSE SRC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 list(FILTER SRC_SOURCES EXCLUDE REGEX ".*/main.cpp$")
 file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit_tests/*.cpp)
 add_executable(tests ${SRC_SOURCES} ${TEST_SOURCES})
-target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+#!!! НЕ ЗАБЫВАТЬ ДОБАВЛЯТЬ ИСХОДНИКИ И В ТЕСТЫ ТОЖЕ!!!
+
+target_include_directories(
+    tests PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/api/include
+)
 target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES})
 gtest_discover_tests(tests)
