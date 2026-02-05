@@ -46,6 +46,11 @@ bool Proxy_Config::validate() const
         std::cerr << "Error in config: blacklisted_hosts_file_name cannot be empty" << std::endl;
         error_flag = true;
     }
+    if(settings.admin_panel_auth_data_file_name.empty())
+    {
+        std::cerr << "Error in config: admin_panel_auth_data_file_name is empty" << std::endl;
+        error_flag = true;
+    }
     if(error_flag)
         return false;
     else
@@ -74,6 +79,8 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 settings.max_bandwidth_per_sec = proxy["max_bandwidth_per_sec"].value_or(settings.max_bandwidth_per_sec);
                 settings.blacklist_on = proxy["blacklist_on"].value_or(settings.blacklist_on);
                 settings.blacklisted_hosts_file_name = proxy["blacklisted_hosts_file_name"].value_or(settings.blacklisted_hosts_file_name);
+                settings.admin_panel_on = proxy["admin_panel_on"].value_or(settings.admin_panel_on);
+                settings.admin_panel_auth_data_file_name = proxy["admin_panel_auth_data_file_name"].value_or(settings.admin_panel_auth_data_file_name);
             }
             if(!validate())
             {
@@ -101,7 +108,9 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 {"log_file_size_bytes", settings.log_file_size_bytes},
                 {"max_bandwidth_per_sec", settings.max_bandwidth_per_sec},
                 {"blacklist_on", settings.blacklist_on},
-                {"blacklisted_hosts_file_name", settings.blacklisted_hosts_file_name}
+                {"blacklisted_hosts_file_name", settings.blacklisted_hosts_file_name},
+                {"admin_panel_on", settings.admin_panel_on},
+                {"admin_panel_auth_data_file_name", settings.admin_panel_auth_data_file_name}
             });
             std::ofstream out_file(filename);
             out_file << config;

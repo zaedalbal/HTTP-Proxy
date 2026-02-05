@@ -26,7 +26,7 @@ class Proxy_Config
             std::string blacklisted_hosts_file_name = "blacklisted_hosts.toml";
 
             bool admin_panel_on = false;
-            std::string login_data_file_name = "login_data.toml";
+            std::string admin_panel_auth_data_file_name = "admin_panel_auth_data_file_name.toml";
         };
         
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига

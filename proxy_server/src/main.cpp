@@ -34,6 +34,9 @@ int main(int argc, char** argv)
         std::cout << "Max_bandwidth_per_sec: " << __PROXY_GLOBALS__::PROXY_CONFIG.max_bandwidth_per_sec << " bytes\n";
         std::cout << "Blacklist_on: " << __PROXY_GLOBALS__::PROXY_CONFIG.blacklist_on << "\n";
         std::cout << "Blacklisted_hosts_file_name: " << __PROXY_GLOBALS__::PROXY_CONFIG.blacklisted_hosts_file_name << "\n";
+        std::cout << "Admin_panel_on: " << __PROXY_GLOBALS__::PROXY_CONFIG.admin_panel_on << "\n";
+        std::cout << "Admin_panel_auth_data_file_name: " << __PROXY_GLOBALS__::PROXY_CONFIG.admin_panel_auth_data_file_name << "\n";
+        
         if(__PROXY_GLOBALS__::PROXY_CONFIG.blacklist_on)
         {
             if(!__PROXY_GLOBALS__::BLACKLISTED_HOSTS.empty())
