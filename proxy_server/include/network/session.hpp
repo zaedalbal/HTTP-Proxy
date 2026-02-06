@@ -15,6 +15,7 @@ class Session : public std::enable_shared_from_this<Session>
         ~Session(); // деструктор
         
         boost::asio::awaitable<void> start_session(); // начало сессии
+        
     private:
         boost::asio::awaitable<void> handle_request(); // обработка запроса
 

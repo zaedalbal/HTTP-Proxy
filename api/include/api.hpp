@@ -34,7 +34,10 @@ namespace api
     struct Request
     {
         MessageType Type = api::MessageType::Request;
+        unsigned short id;
         CommandName Command;
+        bool isChunckedRequest;
+        SendData data;
     };
 
     struct Response
