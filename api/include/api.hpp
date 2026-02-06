@@ -26,19 +26,24 @@ namespace api
         Log_get
     };
 
-    struct SendData
-    {
-        uint32_t data_size;
-        char data[MAX_DATA_SIZE];
-    };
-
     struct Request
     {
         MessageType Type = api::MessageType::Request;
         unsigned short id;
         CommandName Command;
         bool isChunckedRequest;
-        SendData data;
+        uint32_t data_size;
+        std::unique_ptr<char[]> data;
+        Request(uint32_t size = 0) : data_size(size), data(size ? std::make_unique<char[]>(size) : nullptr){}
+    };
+
+    struct RequestHeader
+    {
+        MessageType Type = api::MessageType::Request;
+        unsigned short id;
+        CommandName Command;
+        bool isChunckedRequest;
+        uint32_t data_size;
     };
 
     struct Response
@@ -48,6 +53,18 @@ namespace api
         unsigned short id;
         CommandName Command;
         bool isChunckedResponse;
-        SendData data;
+        uint32_t data_size;
+        std::unique_ptr<char[]> data;
+        Response(uint32_t size = 0) : data_size(size), data(size ? std::make_unique<char[]>(size) : nullptr){}
+    };
+
+    struct ResponseHeader
+    {
+        MessageType Type = api::MessageType::Response;
+        bool ProxyStatus;
+        unsigned short id;
+        CommandName Command;
+        bool isChunckedResponse;
+        uint32_t data_size;
     };
 }

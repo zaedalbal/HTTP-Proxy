@@ -14,7 +14,7 @@ class AdminPanelSession
         
         boost::asio::awaitable<void> read_request();
 
-        boost::asio::awaitable<void> hanlde_request(api::Request request);
+        boost::asio::awaitable<void> hanlde_request(std::shared_ptr<api::Request> request);
 
         boost::asio::awaitable<void> send_response(api::Response response);
 
