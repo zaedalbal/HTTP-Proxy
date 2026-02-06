@@ -18,12 +18,10 @@ namespace api
     {
         AuthenticationRequest,
 
-        Proxy_status,
-        Proxy_activeconnections,
-        
-        Config_get,
-
-        Log_get
+        Get_proxy_status,
+        Get_proxy_sessions,
+        Get_proxy_config,
+        Get_proxy_log
     };
 
     struct Request

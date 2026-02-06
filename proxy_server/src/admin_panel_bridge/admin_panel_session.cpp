@@ -39,5 +39,14 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
             co_await authorize();
     }
     else
-        hanlde_request(request);
+        co_await hanlde_request(request);
 }
+
+boost::asio::awaitable<void> AdminPanelSession::authorize()
+{}
+
+boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<api::Request> request)
+{}
+
+boost::asio::awaitable<void> AdminPanelSession::send_response(api::Response response)
+{}
