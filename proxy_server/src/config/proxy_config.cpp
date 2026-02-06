@@ -31,6 +31,11 @@ bool Proxy_Config::validate() const
         std::cerr << "Error in config: port must be greater than 0" << std::endl;
         error_flag = true;
     }
+    if(settings.admin_panel_port < 1)
+    {
+        std::cerr << "Error in config: admin panel port must be greater than 0" << std::endl;
+        error_flag = true;
+    }
     if(settings.log_file_name.empty())
     {
         std::cerr << "Error in config: log_file_name cannot be empty" << std::endl;
@@ -80,6 +85,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 settings.blacklist_on = proxy["blacklist_on"].value_or(settings.blacklist_on);
                 settings.blacklisted_hosts_file_name = proxy["blacklisted_hosts_file_name"].value_or(settings.blacklisted_hosts_file_name);
                 settings.admin_panel_on = proxy["admin_panel_on"].value_or(settings.admin_panel_on);
+                settings.admin_panel_port = proxy["admin_panel_port"].value_or(settings.admin_panel_port);
                 settings.admin_panel_auth_data_file_name = proxy["admin_panel_auth_data_file_name"].value_or(settings.admin_panel_auth_data_file_name);
             }
             if(!validate())
@@ -110,6 +116,7 @@ void Proxy_Config::load_or_create_cfg(const std::string& filename)
                 {"blacklist_on", settings.blacklist_on},
                 {"blacklisted_hosts_file_name", settings.blacklisted_hosts_file_name},
                 {"admin_panel_on", settings.admin_panel_on},
+                {"admin_panel_port", settings.admin_panel_port},
                 {"admin_panel_auth_data_file_name", settings.admin_panel_auth_data_file_name}
             });
             std::ofstream out_file(filename);

@@ -9,11 +9,11 @@ class Proxy_Config
 
         struct Proxy_Settings // настройки конфига
         {
-            int64_t max_connections = 256; // пока что не используется
+            int64_t max_connections = 256;
             int64_t timeout_milliseconds = 10000;
             // int64_t из за того что toml не хочет принимать std::size_t
 
-            std::string host = "0.0.0.0"; // пока что не используется
+            std::string host = "0.0.0.0";
             unsigned short port = 12345;
 
             bool log_on = false;
@@ -26,6 +26,7 @@ class Proxy_Config
             std::string blacklisted_hosts_file_name = "blacklisted_hosts.toml";
 
             bool admin_panel_on = false;
+            unsigned short admin_panel_port = 54321;
             std::string admin_panel_auth_data_file_name = "admin_panel_auth_data_file_name.toml";
         };
         
