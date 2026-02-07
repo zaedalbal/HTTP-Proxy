@@ -29,10 +29,21 @@ class Proxy_Config
             unsigned short admin_panel_port = 54321;
             std::string admin_panel_auth_data_file_name = "admin_panel_auth_data_file_name.toml";
         };
-        
+
+        struct Admin_panel_account
+        {
+            std::string login;
+            std::string algorithm;
+            uint32_t iterations;
+            std::string salt;
+            std::string hash;
+        }; 
+
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
 
         std::unordered_set<std::string> get_blacklisted_hosts() const;
+
+        Admin_panel_account find_admin_panel_account_by_login(std::string login);
 
     private:
         Proxy_Settings settings; // текущий конфиг
