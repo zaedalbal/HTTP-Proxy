@@ -36,17 +36,37 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
             co_return;
         }
         else
-            co_await authorize();
+            co_await authorize(request);
     }
     else
         co_await hanlde_request(request);
 }
 
-boost::asio::awaitable<void> AdminPanelSession::authorize()
-{}
+boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::Request> reuqest)
+{
+    struct Authentication_header
+    {
+        std::uint32_t login_size;
+        std::uint32_t password_size;
+    };
+    Authentication_header auth_head;
+    std::string login, password;
+    login.resize(auth_head.login_size);
+    password.resize(auth_head.password_size);
+    
+    co_await boost::asio::async_read
+    (panel_socket_, boost::asio::buffer(&auth_head, sizeof(auth_head)), boost::asio::use_awaitable);
+    if(auth_head.login_size > 1024 || auth_head.password_size > 1024)
+        co_return;
+    co_await boost::asio::async_read
+    (panel_socket_, boost::asio::buffer(login.data(), auth_head.login_size), boost::asio::use_awaitable);
+    co_await boost::asio::async_read
+    (panel_socket_, boost::asio::buffer(password.data(), auth_head.password_size), boost::asio::use_awaitable);
+
+}
 
 boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<api::Request> request)
 {}
 
-boost::asio::awaitable<void> AdminPanelSession::send_response(api::Response response)
+boost::asio::awaitable<void> AdminPanelSession::send_response(std::shared_ptr<api::Response> response)
 {}

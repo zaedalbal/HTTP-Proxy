@@ -10,13 +10,13 @@ class AdminPanelSession
         boost::asio::awaitable<void> start_session();
 
     private:
-        boost::asio::awaitable<void> authorize();
+        boost::asio::awaitable<void> authorize(std::shared_ptr<api::Request> reuqest);
         
         boost::asio::awaitable<void> read_request();
 
         boost::asio::awaitable<void> hanlde_request(std::shared_ptr<api::Request> request);
 
-        boost::asio::awaitable<void> send_response(api::Response response);
+        boost::asio::awaitable<void> send_response(std::shared_ptr<api::Response> response);
 
     private:
         boost::asio::ip::tcp::socket panel_socket_;
