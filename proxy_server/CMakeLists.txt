@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost REQUIRED COMPONENTS log log_setup filesystem system thread)
+find_package(OpenSSL REQUIRED)
 
 file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
@@ -20,6 +21,7 @@ target_link_libraries(
     proxy PRIVATE
     tomlplusplus::tomlplusplus
     ${Boost_LIBRARIES}
+    OpenSSL::Crypto
 )
 
 enable_testing()
@@ -37,5 +39,5 @@ target_include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/api/include
 )
-target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES})
+target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES} OpenSSL::Crypto)
 gtest_discover_tests(tests)

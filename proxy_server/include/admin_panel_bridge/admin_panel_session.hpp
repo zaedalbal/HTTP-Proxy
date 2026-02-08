@@ -18,6 +18,9 @@ class AdminPanelSession
 
         boost::asio::awaitable<void> send_response(std::shared_ptr<api::Response> response);
 
+        boost::asio::awaitable<std::optional<std::string>> get_hash_from_password
+        (std::string_view password, std::string_view salt, int iterations, int hash_size);
+
     private:
         boost::asio::ip::tcp::socket panel_socket_;
 

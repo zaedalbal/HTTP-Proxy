@@ -17,6 +17,8 @@ namespace api
     enum class CommandName
     {
         AuthenticationRequest,
+        AuthenticationResponseError,
+        AuthenticationResponseSuccess,
 
         Get_proxy_status,
         Get_proxy_sessions,
