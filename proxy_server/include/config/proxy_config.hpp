@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 #include <unordered_set>
-
+#include <cstdint>
+#include <optional>
 class Proxy_Config
 {
     public:
@@ -43,7 +44,7 @@ class Proxy_Config
 
         std::unordered_set<std::string> get_blacklisted_hosts() const;
 
-        Admin_panel_account find_admin_panel_account_by_login(std::string login);
+        static std::optional<Proxy_Config::Admin_panel_account> find_admin_panel_account_by_login(const std::string& login, const std::string& filename);
 
     private:
         Proxy_Settings settings; // текущий конфиг

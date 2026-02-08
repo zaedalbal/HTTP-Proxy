@@ -3,6 +3,7 @@ project(proxy)
 
 option(BUILD_PROXY_SERVER "Build the proxy server" ON)
 option(BUILD_ADMIN_PANEL "Build the admin panel" ON)
+option(BUILD_TOOLS "Build the tools" ON)
 
 include(FetchContent)
 set(TOML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/tomlplusplus)
@@ -16,6 +17,10 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 if(BUILD_PROXY_SERVER)
     add_subdirectory(proxy_server)
+endif()
+
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
 endif()
 
 if(BUILD_ADMIN_PANEL)

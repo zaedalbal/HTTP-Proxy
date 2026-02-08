@@ -2,6 +2,7 @@
 #include <toml++/toml.hpp>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 Proxy_Config::Proxy_Config()
 {
@@ -167,4 +168,43 @@ std::unordered_set<std::string> Proxy_Config::get_blacklisted_hosts() const
         std::cerr << "Using default settings" << std::endl;
     }
     return blacklisted_hosts;
+}
+
+std::optional<Proxy_Config::Admin_panel_account> 
+Proxy_Config::find_admin_panel_account_by_login(const std::string& login, const std::string& filename)
+{
+    if(!std::filesystem::exists(filename))
+        return std::nullopt;
+    toml::table table;
+    try
+    {
+        table = toml::parse_file(filename);
+    }
+    catch(const toml::parse_error& err)
+    {
+        return std::nullopt;
+    }
+    if(!table.contains(login))
+        return std::nullopt;
+    const auto& account_node = table[login];
+    Proxy_Config::Admin_panel_account account;
+    account.login = login;
+    if(auto algo = account_node["algorithm"].value<std::string>(); algo.has_value())
+        account.algorithm = *algo;
+    else
+        return std::nullopt;
+    if(auto iterations = account_node["iterations"].value<uint32_t>(); iterations.has_value())
+        account.iterations = *iterations;
+    else
+        return std::nullopt;
+    if(auto salt = account_node["salt"].value<std::string>(); salt.has_value())
+        account.salt = *salt;
+    else
+        return std::nullopt;
+    if(auto hash = account_node["hash"].value<std::string>(); hash.has_value())
+        account.hash = *hash;
+    else
+        return std::nullopt;
+
+    return account;
 }

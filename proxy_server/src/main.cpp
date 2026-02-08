@@ -51,6 +51,7 @@ int main(int argc, char** argv)
             else
                 std::cout << "WARNING: Blacklist is enabled but no hosts were loaded!" << std::endl; 
         }
+
         boost::asio::io_context context;
         auto server = std::make_shared<Server>(context, __PROXY_GLOBALS__::PROXY_CONFIG.port);
         
