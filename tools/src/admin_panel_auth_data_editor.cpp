@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-constexpr std::uint32_t PBKDF2_ITERATIONS = 200'000;
+constexpr std::uint32_t PBKDF2_ITERATIONS_MIN = 200000;
+constexpr std::uint32_t PBKDF2_ITERATIONS_MAX = 300000;
 constexpr std::size_t SALT_SIZE = 16;
 constexpr std::size_t HASH_SIZE = 32;
 constexpr std::string_view ALGORITHM = "PBKDF2-HMAC-SHA256";
@@ -32,9 +33,17 @@ std::vector<std::uint8_t> generate_salt()
     return salt;
 }
 
+std::uint32_t generate_iterations()
+{
+    std::uint32_t value = 0;
+    if (RAND_bytes(reinterpret_cast<unsigned char*>(&value), sizeof(value)) != 1)
+        throw std::runtime_error("RAND_bytes failed");
+    return PBKDF2_ITERATIONS_MIN + (value % (PBKDF2_ITERATIONS_MAX - PBKDF2_ITERATIONS_MIN + 1));
+}
+
 std::vector<std::uint8_t> hash_password(
     std::string_view password,
-    std::span<const std::uint8_t> salt)
+    std::span<const std::uint8_t> salt, std::uint32_t iterations)
 {
     std::vector<std::uint8_t> hash(HASH_SIZE);
     if (PKCS5_PBKDF2_HMAC(
@@ -42,7 +51,7 @@ std::vector<std::uint8_t> hash_password(
             static_cast<int>(password.size()),
             salt.data(),
             static_cast<int>(salt.size()),
-            PBKDF2_ITERATIONS,
+            iterations,
             EVP_sha256(),
             static_cast<int>(hash.size()),
             hash.data()) != 1)
@@ -83,15 +92,15 @@ int main(int argc, char* argv[])
             std::string password = argv[4];
 
             auto salt = generate_salt();
-            auto hash = hash_password(password, salt);
+            auto iterations = generate_iterations();
+            auto hash = hash_password(password, salt, static_cast<int>(iterations));
 
             toml::table account;
             account.insert("login", login);
             account.insert("algorithm", std::string(ALGORITHM));
-            account.insert("iterations", PBKDF2_ITERATIONS);
+            account.insert("iterations", iterations);
             account.insert("salt", to_hex(salt));
             account.insert("hash", to_hex(hash));
-
             root.insert_or_assign(login, std::move(account));
 
             std::ofstream file(file_path);
