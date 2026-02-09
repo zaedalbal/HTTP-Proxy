@@ -42,12 +42,15 @@ std::optional<std::string> ProxyFacade::try_get_log() noexcept
 
 std::vector<Session> ProxyFacade::get_sessions()
 {
+    if(!__PROXY_GLOBALS__::SESSIONS)
+        throw std::runtime_error("__PROXY_GLOBALS__::SESSION = nullptr");
     std::vector<Session> sessions;
     sessions.reserve(__PROXY_GLOBALS__::SESSIONS->size());
     for(const auto& [ip, _] : *__PROXY_GLOBALS__::SESSIONS)
     {
         sessions.push_back(Session(ip));
     }
+    return sessions;
 }
 
 Proxy_Config::Proxy_Settings ProxyFacade::get_config()

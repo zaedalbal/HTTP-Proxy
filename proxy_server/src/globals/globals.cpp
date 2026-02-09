@@ -9,7 +9,7 @@
 
 namespace __PROXY_GLOBALS__
 {
-    const std::unordered_map<std::string, std::weak_ptr<Traffic_limiter>>* SESSIONS;
+    const std::unordered_map<std::string, std::weak_ptr<Traffic_limiter>>* SESSIONS = nullptr;
 
     Proxy_Config::Proxy_Settings PROXY_CONFIG;
     std::unordered_set<std::string> BLACKLISTED_HOSTS; // глобальная хеш таблица, к которой идут обращения из других частей кода
