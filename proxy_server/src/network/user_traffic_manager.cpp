@@ -18,7 +18,9 @@ std::shared_ptr<Traffic_limiter> User_traffic_manager::get_or_create_user(const 
 }
 
 User_traffic_manager::User_traffic_manager()
-{}
+{
+    __PROXY_GLOBALS__::SESSIONS = &users_;
+}
 
 User_traffic_manager::~User_traffic_manager()
 {}

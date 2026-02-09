@@ -2,12 +2,15 @@
 
 #include "config/proxy_config.hpp"
 #include "logger/logger.hpp"
+#include "network/traffic_limiter.hpp"
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
 
 namespace __PROXY_GLOBALS__
 {
+    const std::unordered_map<std::string, std::weak_ptr<Traffic_limiter>>* SESSIONS;
+
     Proxy_Config::Proxy_Settings PROXY_CONFIG;
     std::unordered_set<std::string> BLACKLISTED_HOSTS; // глобальная хеш таблица, к которой идут обращения из других частей кода
 
