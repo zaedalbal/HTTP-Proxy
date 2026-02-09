@@ -136,5 +136,14 @@ boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<a
 
 boost::asio::awaitable<void> AdminPanelSession::send_response(std::shared_ptr<api::Response> response)
 {
+    boost::system::error_code ec;
+    std::size_t total_size = sizeof(api::ResponseHeader) + response->data_size;
+    co_await boost::asio::async_write
+    (panel_socket_, boost::asio::buffer(response.get(), total_size), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    if(ec)
+    {
+        panel_socket_.close();
+        co_return;
+    }
     co_return;
 }
