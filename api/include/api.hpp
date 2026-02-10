@@ -16,6 +16,8 @@ namespace api
 
     enum class CommandName
     {
+        NONE_COMMAND,
+
         AuthenticationRequest,
         AuthenticationResponseError,
         AuthenticationResponseSuccess,
@@ -49,9 +51,11 @@ namespace api
     struct Response
     {
         MessageType Type = api::MessageType::Response;
-        bool ProxyStatus;
+        bool ProxyStatus = true;
+        bool RequestFailed = false;
         unsigned short id;
-        CommandName Command;
+        CommandName ResponseCommand;
+        CommandName RequestCommand;
         bool isChunckedResponse;
         uint32_t data_size;
         std::unique_ptr<char[]> data;
@@ -62,9 +66,26 @@ namespace api
     {
         MessageType Type = api::MessageType::Response;
         bool ProxyStatus;
+        bool RequestFailed;
         unsigned short id;
-        CommandName Command;
+        CommandName ResponseCommand;
+        CommandName RequestCommand;
         bool isChunckedResponse;
         uint32_t data_size;
+    };
+
+    struct Proxy_Settings // настройки конфига прокси для api
+    {
+        bool blacklist_on;
+        bool log_on;
+        bool admin_panel_on;
+
+        unsigned short port;
+        unsigned short admin_panel_port;
+
+        int64_t max_connections;
+        int64_t timeout_milliseconds;
+        int64_t log_file_size_bytes;
+        int64_t max_bandwidth_per_sec; 
     };
 }

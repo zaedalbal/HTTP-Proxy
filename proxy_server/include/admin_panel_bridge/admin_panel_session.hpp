@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/asio.hpp>
 #include "api.hpp"
+#include "proxy_facade/proxy_facade.hpp"
 
 class AdminPanelSession
 {
@@ -22,6 +23,8 @@ class AdminPanelSession
         (std::string_view password, std::string_view salt, int iterations, int hash_size);
 
     private:
+        ProxyFacade Facade_;
+        
         boost::asio::ip::tcp::socket panel_socket_;
 
         bool session_authenticated_ = false;

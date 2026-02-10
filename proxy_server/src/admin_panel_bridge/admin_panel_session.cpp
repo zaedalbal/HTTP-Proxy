@@ -111,7 +111,8 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
             if(acc.hash == hash_check.value())
             {
                 auto response = std::make_shared<api::Response>();
-                response->Command = api::CommandName::AuthenticationResponseSuccess;
+                response->ResponseCommand = api::CommandName::AuthenticationResponseSuccess;
+                response->id = request->id;
                 response->ProxyStatus = true;
                 response->isChunckedResponse = false;
                 response->data_size = 0;
@@ -122,7 +123,7 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
         }
     }
     auto response = std::make_shared<api::Response>();
-    response->Command = api::CommandName::AuthenticationResponseError;
+    response->ResponseCommand = api::CommandName::AuthenticationResponseError;
     response->ProxyStatus = true;
     response->isChunckedResponse = false;
     response->data_size = 0;
@@ -131,15 +132,79 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
 
 boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<api::Request> request)
 {
+    auto response = std::make_shared<api::Response>();
+    switch(request->Command)
+    {
+// фигурные скобки нужны внутри для использования auto (НЕ УБИРАТЬ ИХ В БУДУЩЕМ!!!)
+    case api::CommandName::Get_proxy_config:
+    {
+        auto try_config = Facade_.try_get_config();
+        if(try_config.has_value())
+        {
+            auto config = try_config.value();
+            response->data_size = sizeof(api::Proxy_Settings);
+            api::Proxy_Settings proxy_settings_to_send;
+            proxy_settings_to_send.blacklist_on = config.blacklist_on;
+            proxy_settings_to_send.log_on = config.log_on;
+            proxy_settings_to_send.admin_panel_on = config.admin_panel_on;
+            proxy_settings_to_send.port = config.port;
+            proxy_settings_to_send.admin_panel_port = config.admin_panel_port;
+            proxy_settings_to_send.max_connections = config.max_connections;
+            proxy_settings_to_send.timeout_milliseconds = config.timeout_milliseconds;
+            proxy_settings_to_send.log_file_size_bytes = config.log_file_size_bytes;
+            proxy_settings_to_send.max_bandwidth_per_sec = config.max_bandwidth_per_sec;
+            std::memcpy(response->data.get(), &proxy_settings_to_send, sizeof(api::Proxy_Settings));
+        }
+        else
+            response->RequestFailed = true;
+    break;
+    }
+    
+    case api::CommandName::Get_proxy_sessions:
+    {
+        auto try_sessions = Facade_.try_get_sessions();
+        if(try_sessions.has_value())
+        {
+            auto sessions = try_sessions.value();
+            response->data_size = sessions.size() * sizeof(Session);
+            std::memcpy(response->data.get(), sessions.data(), response->data_size);
+        }
+        else
+            response->RequestFailed = true;
+    break;
+    }
+
+    default:
+        response->RequestFailed = true;
+        break;
+    }
+    response->id = request->id;
+    response->ResponseCommand = api::CommandName::NONE_COMMAND;
+    response->RequestCommand = request->Command;
+    co_await send_response(response);
     co_return;
 }
 
 boost::asio::awaitable<void> AdminPanelSession::send_response(std::shared_ptr<api::Response> response)
 {
     boost::system::error_code ec;
-    std::size_t total_size = sizeof(api::ResponseHeader) + response->data_size;
+
+    api::ResponseHeader header;
+    header.id = response->id;
+    header.data_size = response->data_size;
+    header.ResponseCommand = response->ResponseCommand;
+    header.RequestCommand = response->RequestCommand;
+    header.ProxyStatus = response->ProxyStatus;
+    header.isChunckedResponse = response->isChunckedResponse;
+    header.RequestFailed = response->RequestFailed;
+
+    std::vector<boost::asio::const_buffer> buffers;
+    buffers.push_back(boost::asio::buffer(&header, sizeof(header)));
+    if(response->data_size > 0)
+        buffers.push_back(boost::asio::buffer(response->data.get(), response->data_size));
+
     co_await boost::asio::async_write
-    (panel_socket_, boost::asio::buffer(response.get(), total_size), boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    (panel_socket_, buffers, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if(ec)
     {
         panel_socket_.close();

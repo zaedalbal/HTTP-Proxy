@@ -1,6 +1,9 @@
 #include "proxy_facade/proxy_facade.hpp"
 #include "globals/globals.hpp"
 
+ProxyFacade::ProxyFacade()
+{}
+
 std::optional<std::vector<Session>> ProxyFacade::try_get_sessions() noexcept
 {
     try
@@ -59,6 +62,4 @@ Proxy_Config::Proxy_Settings ProxyFacade::get_config()
 }
 
 std::string ProxyFacade::get_log()
-{
-
-}
+{}
