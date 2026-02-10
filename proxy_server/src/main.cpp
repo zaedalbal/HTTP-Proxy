@@ -3,6 +3,7 @@
 #include "config/proxy_config.hpp"
 #include "logger/logger.hpp"
 #include "globals/globals.hpp"
+#include "admin_panel_bridge/admin_panel_bridge.hpp"
 #include <iostream>
 #include <unordered_set>
 
@@ -59,6 +60,16 @@ int main(int argc, char** argv)
         {
             co_await server->run();
         }, boost::asio::detached);
+
+        if(__PROXY_GLOBALS__::PROXY_CONFIG.admin_panel_on)
+        {
+            auto admin_bridge = std::make_shared<AdminPanelBridge>(context, __PROXY_GLOBALS__::PROXY_CONFIG.admin_panel_port);
+
+            boost::asio::co_spawn(context, [admin_bridge]()->boost::asio::awaitable<void>
+        {
+            co_await admin_bridge->run();
+        }, boost::asio::detached);
+        }
         
         context.run();
     }
