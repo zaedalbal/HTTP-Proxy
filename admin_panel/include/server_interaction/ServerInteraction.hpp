@@ -17,8 +17,12 @@ class ServerInteraction : public QObject
     private slots:
         void onReadyRead();
 
+        void onBytesWritten(qint64 bytes);
+
     private:
         QByteArray buffer_;
+
+        QByteArray remainingData_;
 
         QTcpSocket socket_;
 
