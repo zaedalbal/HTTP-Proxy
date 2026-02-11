@@ -54,8 +54,8 @@ namespace api
         bool ProxyStatus = true;
         bool RequestFailed = false;
         unsigned short id;
-        CommandName ResponseCommand;
-        CommandName RequestCommand;
+        CommandName ResponseCommand; // команда для каких то действий в ui
+        CommandName RequestCommand; // информация на какую команду ответ
         bool isChunckedResponse;
         uint32_t data_size;
         std::unique_ptr<char[]> data;
@@ -68,8 +68,8 @@ namespace api
         bool ProxyStatus;
         bool RequestFailed;
         unsigned short id;
-        CommandName ResponseCommand;
-        CommandName RequestCommand;
+        CommandName ResponseCommand; // команда для каких то действий в ui
+        CommandName RequestCommand; // информация на какую команду ответ
         bool isChunckedResponse;
         uint32_t data_size;
     };

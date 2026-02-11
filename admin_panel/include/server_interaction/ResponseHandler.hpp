@@ -7,11 +7,13 @@ class ResponseHandler : public QObject // при взаимодействии с
 
     public:
         ResponseHandler();
+
+        void handleResponse(api::Response response);
         
     // данная структура нужна на будущее, если в информации о сессии будет что то ещё
     struct Session
     {
-        uint32_t ip_;
+        QString ip_;
     };
     
     signals:
@@ -22,10 +24,10 @@ class ResponseHandler : public QObject // при взаимодействии с
         void Signal_Get_proxy_config(api::Proxy_Settings config);
 
     private:
-        void ResponseCommand_AuthenticationRequest(api::Response response);
+        void handleRequestCommand_AuthenticationRequest(api::Response response);
 
-        void ResponseCommand_Get_proxy_sessions(api::Response response);
+        void handleRequestCommand_Get_proxy_sessions(api::Response response);
 
-        void ResponseCommand_Get_proxy_config(api::Response response);
+        void handleRequestCommand_Get_proxy_config(api::Response response);
 
 };
