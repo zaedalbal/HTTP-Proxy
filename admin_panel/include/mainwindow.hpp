@@ -20,6 +20,7 @@
 #include "pages/AuthenticationPage/AuthenticationPageWidget.hpp"
 #include "pages/ConfigPage/ConfigPageWidget.hpp"
 #include "pages/LogPage/LogPageWidget.hpp"
+#include "server_interaction/ServerInteraction.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -29,6 +30,7 @@ class MainWindow : public QMainWindow
         MainWindow(QWidget* parent = nullptr); // constructor
         ~MainWindow(); // destructor
 
+// приватное поле для объектов интерфейса
     private:
         // основное окно
         QWidget* Central; 
@@ -46,6 +48,10 @@ class MainWindow : public QMainWindow
 
         // сплитер (для изменения размера меню и страниц)
         QSplitter* Splitter;
+
+// приватное поле для взаимодействия с сервером
+    private:
+        ServerInteraction ServerInteraction_;
 
     private:
         void initialSetup();

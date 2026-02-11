@@ -40,6 +40,7 @@ void AuthenticationPageWidget::setupUI()
     mainLayout->addLayout(formLayout);
 
     connectButton_ = new QPushButton(this);
+    connectButton_->setText("Connect");
     
     mainLayout->addWidget(connectButton_);
 }
