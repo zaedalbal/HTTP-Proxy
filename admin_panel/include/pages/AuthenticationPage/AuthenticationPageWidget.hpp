@@ -1,7 +1,11 @@
 #pragma once
 #include <QWidget>
-#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
+#include <QFormLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 class AuthenticationPageWidget : public QWidget
 {
@@ -11,19 +15,19 @@ class AuthenticationPageWidget : public QWidget
         explicit AuthenticationPageWidget(QWidget* parent = nullptr);
 
         void startSetupUI();
-    
-        bool getAuthenticationStatus();
-    
+        
     signals:
         void loginSuccess();
-
+        
     private:
         void setupUI();
 
     private:
-        QPushButton* test_button; 
-
-        bool isAuthenticated_ = false;
-
-        QHBoxLayout* layout_{nullptr};
+        QVBoxLayout* mainLayout;
+        QFormLayout* formLayout;
+        QLineEdit* ipEdit_;
+        QLineEdit* portEdit_;
+        QLineEdit* loginEdit_;
+        QLineEdit* passwordEdit_;
+        QPushButton* connectButton_;
 };

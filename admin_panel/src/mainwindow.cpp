@@ -30,6 +30,7 @@ void MainWindow::initialSetup()
     resize(1200, 600);
     CentralLayout = new QHBoxLayout(Central);
     AuthenticationPage = new AuthenticationPageWidget(Central);
+    CentralLayout->addWidget(AuthenticationPage);
     connect(AuthenticationPage, &AuthenticationPageWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
     AuthenticationPage->startSetupUI();
 }
@@ -46,7 +47,6 @@ void MainWindow::setupMainUI()
     // настройка страниц
     Pages = new QStackedWidget(Central);
     ActiveConnectionsPage = new ActiveConnectionsPageWidget;
-    AuthenticationPage = new AuthenticationPageWidget;
     ConfigPage = new ConfigPageWidget;
     LogPage = new LogPageWidget;
 
