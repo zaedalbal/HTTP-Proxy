@@ -63,19 +63,18 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
     }
 }
 
-boost::asio::awaitable<std::optional<std::string>> AdminPanelSession::get_hash_from_password(std::string_view password, std::string_view salt, int iterations, int hash_size)
+boost::asio::awaitable<std::optional<std::vector<uint8_t>>>
+AdminPanelSession::get_hash_from_password(std::string_view password, std::span<const uint8_t> salt, int iterations, int hash_size)
 {
-    std::string hash;
-    hash.resize(hash_size);
-    auto *salt_bytes = reinterpret_cast<const unsigned char *>(salt.data());
+    std::vector<uint8_t> hash(hash_size);
     if (PKCS5_PBKDF2_HMAC(password.data(),
                           static_cast<int>(password.size()),
-                          salt_bytes,
+                          salt.data(),
                           static_cast<int>(salt.size()),
                           iterations,
                           EVP_sha256(),
                           hash_size,
-                          reinterpret_cast<unsigned char *>(hash.data())) != 1)
+                          hash.data()) != 1)
         co_return std::nullopt;
     else
         co_return hash;
@@ -101,6 +100,9 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
     std::string login(reinterpret_cast<char*>(request->data.get() + offset), auth_head.login_size);
     offset += auth_head.login_size;
     std::string password(reinterpret_cast<char*>(request->data.get() + offset), auth_head.password_size);
+#ifdef DEBUG
+    __PROXY_GLOBALS__::DEBUG_LOGGER << "password in AdminPanelSession::authorize : " << password << std::endl;
+#endif
     auto account = Proxy_Config::find_admin_panel_account_by_login(login, __PROXY_GLOBALS__::PROXY_CONFIG.admin_panel_auth_data_file_name);
     if(account.has_value())
     {
@@ -118,6 +120,8 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
                 response->data_size = 0;
                 session_authenticated_ = true;
                 co_await send_response(response);
+                if(__PROXY_GLOBALS__::LOG_ON)
+                    __PROXY_GLOBALS__::LOGGER << "Successful login to the panel: username: " << login << std::endl;
                 co_return;
             }
         }
@@ -127,6 +131,8 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
     response->ProxyStatus = true;
     response->isChunckedResponse = false;
     response->data_size = 0;
+    if(__PROXY_GLOBALS__::LOG_ON)
+        __PROXY_GLOBALS__::LOGGER << "Unsuccessful login to the panel: username: " << login << std::endl;
     co_await send_response(response); 
 }
 

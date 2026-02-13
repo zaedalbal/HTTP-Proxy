@@ -3,6 +3,8 @@
 #include <unordered_set>
 #include <cstdint>
 #include <optional>
+#include <vector>
+
 class Proxy_Config
 {
     public:
@@ -36,9 +38,9 @@ class Proxy_Config
             std::string login;
             std::string algorithm;
             uint32_t iterations;
-            std::string salt;
-            std::string hash;
-        }; 
+            std::vector<uint8_t> salt;
+            std::vector<uint8_t> hash;
+        };
 
         const Proxy_Settings& get_settings() const {return settings;}; // геттер для получение конфига
 

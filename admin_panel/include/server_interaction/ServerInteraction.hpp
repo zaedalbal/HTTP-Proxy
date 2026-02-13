@@ -1,3 +1,4 @@
+#pragma once
 #include <QTcpSocket>
 #include "api.hpp"
 
@@ -13,6 +14,9 @@ class ServerInteraction : public QObject
         void sendRequest(api::Request request);
 
         void setResponseHandler(std::function<void(const api::Response)> handler);
+
+    signals:
+        void successfulConnect();
 
     private slots:
         void onReadyRead();

@@ -170,6 +170,20 @@ std::unordered_set<std::string> Proxy_Config::get_blacklisted_hosts() const
     return blacklisted_hosts;
 }
 
+// функция для использования в Proxy_Config::find_admin_panel_account_by_login
+inline std::vector<uint8_t> hex_to_bytes(const std::string& hex)
+{
+    std::vector<uint8_t> bytes;
+    if (hex.size() % 2 != 0) return bytes; // на всякий случай
+    bytes.reserve(hex.size() / 2);
+    for (size_t i = 0; i < hex.size(); i += 2)
+    {
+        uint8_t byte = static_cast<uint8_t>(std::stoul(hex.substr(i, 2), nullptr, 16));
+        bytes.push_back(byte);
+    }
+    return bytes;
+}
+
 std::optional<Proxy_Config::Admin_panel_account> 
 Proxy_Config::find_admin_panel_account_by_login(const std::string& login, const std::string& filename)
 {
@@ -198,11 +212,11 @@ Proxy_Config::find_admin_panel_account_by_login(const std::string& login, const 
     else
         return std::nullopt;
     if(auto salt = account_node["salt"].value<std::string>(); salt.has_value())
-        account.salt = *salt;
+        account.salt = hex_to_bytes(*salt);
     else
         return std::nullopt;
     if(auto hash = account_node["hash"].value<std::string>(); hash.has_value())
-        account.hash = *hash;
+        account.hash = hex_to_bytes(*hash);
     else
         return std::nullopt;
 

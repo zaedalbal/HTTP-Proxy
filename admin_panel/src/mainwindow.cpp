@@ -14,9 +14,11 @@
 #include <QGroupBox>
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
+    RequestFacade_ = new RequestFacade(ServerInteraction_);
     std::cout << "constructor called\n";
     initialSetup();
 } 
@@ -32,6 +34,7 @@ void MainWindow::initialSetup()
     AuthenticationPage = new AuthenticationPageWidget(Central);
     CentralLayout->addWidget(AuthenticationPage);
     connect(AuthenticationPage, &AuthenticationPageWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
+    connect(AuthenticationPage, &AuthenticationPageWidget::connectButtonClicked, this, &MainWindow::onConnectButtonClicked);
     AuthenticationPage->startSetupUI();
 }
 
@@ -68,6 +71,22 @@ void MainWindow::setupMainUI()
 void MainWindow::onLoginSuccess()
 {
     setupMainUI();
+}
+
+void MainWindow::onConnectButtonClicked(const QString& ip, const QString& port, const QString& login, const QString& password)
+{
+    qDebug() << "onConnectButtonClicked slot was called";
+    bool check = false;
+    quint16 port_to_arg = port.toUShort(&check);
+    if(!check)
+    {
+        QMessageBox::warning(this, "Error", "Incorrect ip or port");
+    }
+    ServerInteraction_.connectToServer(ip, port_to_arg);
+    connect(&ServerInteraction_, &ServerInteraction::successfulConnect, this, [this, login, password]
+    {
+        RequestFacade_->sendAuthenticationRequest(login, password);
+    });
 }
 
 MainWindow::~MainWindow()

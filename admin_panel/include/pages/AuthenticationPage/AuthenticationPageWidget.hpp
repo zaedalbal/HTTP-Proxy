@@ -18,6 +18,8 @@ class AuthenticationPageWidget : public QWidget
         
     signals:
         void loginSuccess();
+
+        void connectButtonClicked(const QString& ip, const QString& port, const QString& login, const QString& password);
         
     private:
         void setupUI();

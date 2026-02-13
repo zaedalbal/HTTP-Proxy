@@ -21,6 +21,8 @@
 #include "pages/ConfigPage/ConfigPageWidget.hpp"
 #include "pages/LogPage/LogPageWidget.hpp"
 #include "server_interaction/ServerInteraction.hpp"
+#include "server_interaction/ResponseHandler.hpp"
+#include "server_interaction/RequestFacade.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -53,11 +55,18 @@ class MainWindow : public QMainWindow
     private:
         ServerInteraction ServerInteraction_;
 
+        ResponseHandler ResponseHandler_;
+
+        RequestFacade* RequestFacade_;
+        
     private:
         void initialSetup();
+
         void setupMainUI();
     
     private slots:
         void onLoginSuccess();
+
+        void onConnectButtonClicked(const QString& ip, const QString& port, const QString& login, const QString& password);
 
 };

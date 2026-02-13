@@ -43,4 +43,8 @@ void AuthenticationPageWidget::setupUI()
     connectButton_->setText("Connect");
     
     mainLayout->addWidget(connectButton_);
+    connect(connectButton_, &QPushButton::clicked, this, [this]()
+    {
+        emit connectButtonClicked(ipEdit_->text(), portEdit_->text(), loginEdit_->text(), passwordEdit_->text());
+    });
 }

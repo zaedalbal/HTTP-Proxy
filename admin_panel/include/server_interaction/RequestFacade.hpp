@@ -1,3 +1,4 @@
+#pragma once
 #include "ServerInteraction.hpp"
 
 class RequestFacade : public QObject // данный класс нужен формирования запросов и отправки их на сервер

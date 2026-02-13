@@ -4,6 +4,7 @@ ServerInteraction::ServerInteraction()
 {
     connect(&socket_, &QTcpSocket::bytesWritten, this, &ServerInteraction::onBytesWritten);
     connect(&socket_, &QTcpSocket::readyRead, this, &ServerInteraction::onReadyRead);
+    connect(&socket_, &QTcpSocket::connected, this, [this](){emit successfulConnect();});
 }
 
 void ServerInteraction::connectToServer(QString host, quint16 port)

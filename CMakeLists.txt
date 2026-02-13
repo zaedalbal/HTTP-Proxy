@@ -5,6 +5,9 @@ option(BUILD_PROXY_SERVER "Build the proxy server" ON)
 option(BUILD_ADMIN_PANEL "Build the admin panel" ON)
 option(BUILD_TOOLS "Build the tools" ON)
 
+#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,leak -fno-omit-frame-pointer -g")
+#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address,leak")
+
 include(FetchContent)
 set(TOML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/tomlplusplus)
 FetchContent_Declare(
