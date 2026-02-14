@@ -1,23 +1,26 @@
 #include "server_interaction/ResponseHandler.hpp"
 #include <QDebug>
+#include <iostream>
 
 ResponseHandler::ResponseHandler()
 {}
 
-void ResponseHandler::handleResponse(api::Response response)
+void ResponseHandler::handleResponse(std::shared_ptr<api::Response> response)
 {
-    switch (response.RequestCommand)
+    std::cout << "handleResponse called\n";
+    //std::cout << "RequestCommand raw value: " << static_cast<int>(response->RequestCommand) << "\n";
+    switch (response->RequestCommand)
     {
         case api::CommandName::AuthenticationRequest:
-            handleRequestCommand_AuthenticationRequest(std::move(response));
+            handleRequestCommand_AuthenticationRequest(response);
             break;
 
         case api::CommandName::Get_proxy_config:
-            handleRequestCommand_Get_proxy_config(std::move(response));
+            handleRequestCommand_Get_proxy_config(response);
             break;
         
         case api::CommandName::Get_proxy_sessions:
-            handleRequestCommand_Get_proxy_sessions(std::move(response));
+            handleRequestCommand_Get_proxy_sessions(response);
             break;
 
         default:
@@ -26,13 +29,16 @@ void ResponseHandler::handleResponse(api::Response response)
     }
 }
 
-void ResponseHandler::handleRequestCommand_AuthenticationRequest(api::Response response)
+void ResponseHandler::handleRequestCommand_AuthenticationRequest(std::shared_ptr<api::Response> response)
 {
-    emit Signal_Authentication(response.RequestCommand);
+    if(response->ResponseCommand == api::CommandName::AuthenticationResponseSuccess)
+        emit Signal_AuthenticationSuccessful();
+    else
+        emit Signal_AuthenticationUnsuccessful();
 }
 
-void ResponseHandler::handleRequestCommand_Get_proxy_sessions(api::Response response)
+void ResponseHandler::handleRequestCommand_Get_proxy_sessions(std::shared_ptr<api::Response> response)
 {}
 
-void ResponseHandler::handleRequestCommand_Get_proxy_config(api::Response response)
+void ResponseHandler::handleRequestCommand_Get_proxy_config(std::shared_ptr<api::Response> response)
 {}

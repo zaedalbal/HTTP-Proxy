@@ -9,7 +9,7 @@ class ResponseHandler : public QObject // при взаимодействии с
     public:
         ResponseHandler();
 
-        void handleResponse(api::Response response);
+        void handleResponse(std::shared_ptr<api::Response> response);
         
     // данная структура нужна на будущее, если в информации о сессии будет что то ещё
     struct Session
@@ -18,17 +18,19 @@ class ResponseHandler : public QObject // при взаимодействии с
     };
     
     signals:
-        void Signal_Authentication(api::CommandName command);
+        void Signal_AuthenticationSuccessful();
+
+        void Signal_AuthenticationUnsuccessful();
 
         void Signal_Get_proxy_sessions(QVector<Session> sessions);
 
         void Signal_Get_proxy_config(api::Proxy_Settings config);
 
     private:
-        void handleRequestCommand_AuthenticationRequest(api::Response response);
+        void handleRequestCommand_AuthenticationRequest(std::shared_ptr<api::Response> response);
 
-        void handleRequestCommand_Get_proxy_sessions(api::Response response);
+        void handleRequestCommand_Get_proxy_sessions(std::shared_ptr<api::Response> response);
 
-        void handleRequestCommand_Get_proxy_config(api::Response response);
+        void handleRequestCommand_Get_proxy_config(std::shared_ptr<api::Response> response);
 
 };

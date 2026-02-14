@@ -25,6 +25,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::initialSetup()
 {
+    connect(&ServerInteraction_, &ServerInteraction::successfulConnect, this, [this]()
+    {
+        RequestFacade_->sendAuthenticationRequest(lastLogin_, lastPassword_);
+    });
+
+    connect(&ServerInteraction_, &ServerInteraction::responseReceived, &ResponseHandler_, &ResponseHandler::handleResponse);
+    connect(&ResponseHandler_, &ResponseHandler::Signal_AuthenticationSuccessful, this, &MainWindow::setupMainUI);
+
     // настройка главного окна
     Central = new QWidget(this);
     setCentralWidget(Central);
@@ -42,6 +50,7 @@ void MainWindow::setupMainUI()
 {
     std::cout << "Setup mainUI\n";
     // настройка меню
+    AuthenticationPage->hide();
     Menu = new QListWidget;
     Menu->addItem("Active connections");
     Menu->addItem("Config");
@@ -75,18 +84,20 @@ void MainWindow::onLoginSuccess()
 
 void MainWindow::onConnectButtonClicked(const QString& ip, const QString& port, const QString& login, const QString& password)
 {
-    qDebug() << "onConnectButtonClicked slot was called";
+    qDebug() << "onConnectButtonClicked slot was called\n";
+    lastLogin_ = login;
+    lastPassword_ = password;
     bool check = false;
     quint16 port_to_arg = port.toUShort(&check);
-    if(!check)
+    QHostAddress address;
+    if(!address.setAddress(ip) || !check)
     {
         QMessageBox::warning(this, "Error", "Incorrect ip or port");
+        return;
     }
-    ServerInteraction_.connectToServer(ip, port_to_arg);
-    connect(&ServerInteraction_, &ServerInteraction::successfulConnect, this, [this, login, password]
-    {
-        RequestFacade_->sendAuthenticationRequest(login, password);
-    });
+    if(ServerInteraction_.state() == QAbstractSocket::SocketState::UnconnectedState)
+        ServerInteraction_.connectToServer(ip, port_to_arg);
+    //connect(&ServerInteraction_, &ServerInteraction::successfulConnect, this, [this](){ServerInteraction_.disconnect();});
 }
 
 MainWindow::~MainWindow()

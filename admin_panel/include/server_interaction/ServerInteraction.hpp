@@ -13,10 +13,15 @@ class ServerInteraction : public QObject
 
         void sendRequest(api::Request request);
 
-        void setResponseHandler(std::function<void(const api::Response)> handler);
+        void disconnect();
 
+        QAbstractSocket::SocketState state();
     signals:
+        void responseReceived(std::shared_ptr<api::Response> response);
+
         void successfulConnect();
+
+        void disconnected();
 
     private slots:
         void onReadyRead();
@@ -29,7 +34,5 @@ class ServerInteraction : public QObject
         QByteArray remainingData_;
 
         QTcpSocket socket_;
-
-        std::function<void(const api::Response)> response_handler_;
 
 };

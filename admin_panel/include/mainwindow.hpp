@@ -58,6 +58,9 @@ class MainWindow : public QMainWindow
         ResponseHandler ResponseHandler_;
 
         RequestFacade* RequestFacade_;
+
+        QString lastLogin_;
+        QString lastPassword_;
         
     private:
         void initialSetup();

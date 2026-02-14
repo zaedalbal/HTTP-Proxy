@@ -3,6 +3,7 @@
 #include <openssl/evp.h>
 #include "globals/globals.hpp"
 
+#define DEBUG
 #define READ_BUFFER_SIZE 16384
 
 AdminPanelSession::AdminPanelSession(boost::asio::ip::tcp::socket socket)
@@ -17,8 +18,16 @@ boost::asio::awaitable<void> AdminPanelSession::start_session()
 
 boost::asio::awaitable<void> AdminPanelSession::read_request()
 {
+#ifdef DEBUG
+    size_t i = 0;
+#endif
+
     while(true)
     {
+#ifdef DEBUG
+            __PROXY_GLOBALS__::DEBUG_LOGGER << "New iterations in AminPanelSession::read_request: i = " << i << std::endl;
+            i++;
+#endif
         api::RequestHeader header;
         boost::system::error_code ec;
         co_await boost::asio::async_read(panel_socket_, boost::asio::buffer(&header, sizeof(header)), 
@@ -113,6 +122,7 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
             if(acc.hash == hash_check.value())
             {
                 auto response = std::make_shared<api::Response>();
+                response->RequestCommand = api::CommandName::AuthenticationRequest;
                 response->ResponseCommand = api::CommandName::AuthenticationResponseSuccess;
                 response->id = request->id;
                 response->ProxyStatus = true;
@@ -127,6 +137,7 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
         }
     }
     auto response = std::make_shared<api::Response>();
+    response->RequestCommand = api::CommandName::AuthenticationRequest;
     response->ResponseCommand = api::CommandName::AuthenticationResponseError;
     response->ProxyStatus = true;
     response->isChunckedResponse = false;
