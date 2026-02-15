@@ -166,6 +166,7 @@ boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<a
         {
             auto config = try_config.value();
             response->data_size = sizeof(api::Proxy_Settings);
+            response->data = std::make_unique<char[]>(response->data_size);
             api::Proxy_Settings proxy_settings_to_send;
             proxy_settings_to_send.blacklist_on = config.blacklist_on;
             proxy_settings_to_send.log_on = config.log_on;
@@ -190,6 +191,7 @@ boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<a
         {
             auto sessions = try_sessions.value();
             response->data_size = sessions.size() * sizeof(Session);
+            response->data = std::make_unique<char[]>(response->data_size);
             std::memcpy(response->data.get(), sessions.data(), response->data_size);
         }
         else
