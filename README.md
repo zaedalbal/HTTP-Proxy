@@ -7,6 +7,7 @@
 * HTTP/1.1 проксирование первого запроса, затем тунелирование
 * HTTPS через метод `CONNECT` (туннелирование)
 * Просмотр состояние прокси через админ-панель
+(на данный момент админ-панель находится в разработке. Админ-панель не имеет шифрования и имеет возможность только смотреть конфиг и сессии прокси-сервера)
 
 ---
 
@@ -27,19 +28,19 @@
 **Для Ubuntu/Debian:**
 
 ```bash
-sudo apt install git cmake g++ libboost-dev libboost-system-dev libgtest-dev libboost-log-dev qt6-base-dev
+sudo apt install git cmake g++ libboost-dev libboost-system-dev libboost-log-dev libgtest-dev libssl-dev
 ```
 
 **Для Fedora:**
 
 ```bash
-sudo dnf install git cmake gcc-c++ boost-devel gtest-devel qt6-qtbase-devel
+sudo dnf install git cmake gcc-c++ boost-devel gtest-devel openssl-devel
 ```
 
 **Для Arch Linux / Manjaro:**
 
 ```bash
-sudo pacman -S git cmake gcc boost gtest qt6-base
+sudo pacman -S git cmake gcc boost gtest openssl
 ```
 
 (если ваша версия CMake < 3.31, вы можете попробовать поменять CMakeLists.txt)
@@ -66,6 +67,9 @@ bash ./build.sh
 ---
 
 ## Ручная сборка проекта
+
+Флаги для сборки
+
 ```bash
 BUILD_PROXY_SERVER # Сборка прокси-сервера
 
@@ -73,6 +77,9 @@ BUILD_ADMIN_PANEL # Сборка админ-панели
 
 BUILD_TOOLS # Сборка утилит для настройки прокси-сервера
 ```
+
+Сборка проекта
+
 ```bash
 mkdir build
 cd build
@@ -113,7 +120,20 @@ cmake --build . --config Release
 Дефолтные значение в конфиг файле
 
 ```bash
-
+[proxy]
+admin_panel_auth_data_file_name = 'admin_panel_auth_data_file_name.toml'
+admin_panel_on = false
+admin_panel_port = 54321
+blacklist_on = false
+blacklisted_hosts_file_name = 'blacklisted_hosts.toml'
+host = '0.0.0.0'
+log_file_name = 'proxy.log'
+log_file_size_bytes = 16777216
+log_on = false
+max_bandwidth_per_sec = 2097152
+max_connections = 256
+port = 12345
+timeout_milliseconds = 10000
 ```
 
 Формат черного списка
@@ -305,3 +325,6 @@ HTTP-Proxy/
 Данный прокси не предназначен для обхода блокировок или DPI-систем.
 
 Прокси НЕ шифрует, НЕ маскирует, НЕ модифицирует и НЕ дробит заголовки HTTP/HTTPS.
+
+Админ-панель находится в разработке
+(на данный момент не имеет шифрования и имеет возможность только смотреть конфиг и сессии прокси-сервера).
