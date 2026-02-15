@@ -16,6 +16,9 @@ void ConfigPageWidget::setupUI()
     configDisplayWidget_ = new QTextEdit(this);
     configDisplayWidget_->setText("NONE");
     configDisplayWidget_->setReadOnly(true);
+    QFont font = configDisplayWidget_->font();
+    font.setPointSize(16);
+    configDisplayWidget_->setFont(font);
 
     layout_->addWidget(configDisplayWidget_);
 }
