@@ -55,4 +55,6 @@ void ResponseHandler::handleRequestCommand_Get_proxy_config(std::shared_ptr<api:
 }
 
 void ResponseHandler::handleRequestCommand_Get_proxy_sessions(std::shared_ptr<api::Response> response)
-{}
+{
+    QVector<SessionInfo> sessions;
+}

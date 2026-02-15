@@ -16,7 +16,7 @@
 #include <QCheckBox>
 #include <QListWidget>
 #include <QStackedWidget>
-#include "pages/ActiveConnectionsPage/ActiveConnectionsPageWidget.hpp"
+#include "pages/ProxySessionsPage/ProxySessionsPageWidget.hpp"
 #include "pages/AuthenticationPage/AuthenticationPageWidget.hpp"
 #include "pages/ConfigPage/ConfigPageWidget.hpp"
 #include "pages/LogPage/LogPageWidget.hpp"
@@ -43,7 +43,7 @@ class MainWindow : public QMainWindow
 
         // страницы
         QStackedWidget* Pages;
-        ActiveConnectionsPageWidget* ActiveConnectionsPage;
+        ProxySessionsPageWidget* ActiveConnectionsPage;
         AuthenticationPageWidget* AuthenticationPage;
         ConfigPageWidget* ConfigPage;
         LogPageWidget* LogPage;

@@ -55,7 +55,7 @@ void MainWindow::setupMainUI()
     // настройка меню
     AuthenticationPage->hide();
     Menu = new QListWidget;
-    Menu->addItem("Active connections");
+    Menu->addItem("Proxy sessions");
     Menu->addItem("Config");
     Menu->addItem("Log");
 
@@ -69,7 +69,7 @@ void MainWindow::setupMainUI()
     // настройка страниц
     Pages = new QStackedWidget(Central);
 
-    ActiveConnectionsPage = new ActiveConnectionsPageWidget;
+    ActiveConnectionsPage = new ProxySessionsPageWidget;
 
     ConfigPage = new ConfigPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_config, ConfigPage, &ConfigPageWidget::displayConfig);
