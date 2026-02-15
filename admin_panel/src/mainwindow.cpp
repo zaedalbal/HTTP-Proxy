@@ -32,6 +32,7 @@ void MainWindow::initialSetup()
 
     connect(&ServerInteraction_, &ServerInteraction::responseReceived, &ResponseHandler_, &ResponseHandler::handleResponse);
     connect(&ResponseHandler_, &ResponseHandler::Signal_AuthenticationSuccessful, this, &MainWindow::setupMainUI);
+    connect(&ResponseHandler_, &ResponseHandler::Signal_AuthenticationUnsuccessful, &ServerInteraction_, &ServerInteraction::disconnect);
 
     // настройка главного окна
     Central = new QWidget(this);

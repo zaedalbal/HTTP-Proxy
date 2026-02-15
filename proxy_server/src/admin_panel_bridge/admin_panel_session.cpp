@@ -22,7 +22,7 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
     size_t i = 0;
 #endif
 
-    while(true)
+    while(panel_socket_.is_open())
     {
 #ifdef DEBUG
             __PROXY_GLOBALS__::DEBUG_LOGGER << "New iterations in AminPanelSession::read_request: i = " << i << std::endl;
@@ -34,11 +34,13 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
         boost::asio::redirect_error(boost::asio::use_awaitable, ec));
         if(ec)
         {
+            panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
             panel_socket_.close();
             co_return;
         }
         if(header.data_size > READ_BUFFER_SIZE*4)
         {
+            panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
             panel_socket_.close();
             co_return;
         }
@@ -53,6 +55,7 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
             boost::asio::redirect_error(boost::asio::use_awaitable, ec));
             if(ec)
             {
+                panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 panel_socket_.close();
                 co_return;
             }
@@ -143,8 +146,11 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
     response->isChunckedResponse = false;
     response->data_size = 0;
     if(__PROXY_GLOBALS__::LOG_ON)
-        __PROXY_GLOBALS__::LOGGER << "Unsuccessful login to the panel: username: " << login << std::endl;
-    co_await send_response(response); 
+        __PROXY_GLOBALS__::LOGGER << "Unsuccessful login to the panel from:" << panel_socket_.remote_endpoint().address().to_string() << std::endl;
+    co_await send_response(response);
+    boost::system::error_code ec;
+    panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    panel_socket_.close();
 }
 
 boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<api::Request> request)
@@ -224,6 +230,7 @@ boost::asio::awaitable<void> AdminPanelSession::send_response(std::shared_ptr<ap
     (panel_socket_, buffers, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if(ec)
     {
+        panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
         panel_socket_.close();
         co_return;
     }
