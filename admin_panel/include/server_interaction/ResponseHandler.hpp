@@ -24,7 +24,7 @@ class ResponseHandler : public QObject // при взаимодействии с
 
         void Signal_Get_proxy_sessions(QVector<Session> sessions);
 
-        void Signal_Get_proxy_config(api::Proxy_Settings config);
+        void Signal_Get_proxy_config(QString config);
 
     private:
         void handleRequestCommand_AuthenticationRequest(std::shared_ptr<api::Response> response);

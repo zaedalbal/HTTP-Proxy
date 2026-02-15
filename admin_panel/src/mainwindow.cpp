@@ -34,6 +34,8 @@ void MainWindow::initialSetup()
     connect(&ResponseHandler_, &ResponseHandler::Signal_AuthenticationSuccessful, this, &MainWindow::setupMainUI);
     connect(&ResponseHandler_, &ResponseHandler::Signal_AuthenticationUnsuccessful, &ServerInteraction_, &ServerInteraction::disconnect);
 
+    connect(&ServerInteraction_, &ServerInteraction::disconnected, this, [this](){qDebug()<<"Socket disconnected\n";});
+
     // настройка главного окна
     Central = new QWidget(this);
     setCentralWidget(Central);
@@ -57,10 +59,21 @@ void MainWindow::setupMainUI()
     Menu->addItem("Config");
     Menu->addItem("Log");
 
+    connect(Menu, &QListWidget::currentRowChanged, this, [this](int row)
+    {
+        QListWidgetItem* item = Menu->item(row);
+        if(item && item->text() == "Config")
+            RequestFacade_->sendGetProxyConfigRequest();
+    });
+
     // настройка страниц
     Pages = new QStackedWidget(Central);
+
     ActiveConnectionsPage = new ActiveConnectionsPageWidget;
+
     ConfigPage = new ConfigPageWidget;
+    connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_config, ConfigPage, &ConfigPageWidget::displayConfig);
+
     LogPage = new LogPageWidget;
 
     Pages->addWidget(ActiveConnectionsPage);
@@ -98,7 +111,6 @@ void MainWindow::onConnectButtonClicked(const QString& ip, const QString& port, 
     }
     if(ServerInteraction_.state() == QAbstractSocket::SocketState::UnconnectedState)
         ServerInteraction_.connectToServer(ip, port_to_arg);
-    //connect(&ServerInteraction_, &ServerInteraction::successfulConnect, this, [this](){ServerInteraction_.disconnect();});
 }
 
 MainWindow::~MainWindow()

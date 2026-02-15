@@ -1,6 +1,7 @@
 #pragma once
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QTextEdit>
 
 class ConfigPageWidget : public QWidget
 {
@@ -8,9 +9,15 @@ class ConfigPageWidget : public QWidget
 
     public:
         explicit ConfigPageWidget(QWidget* parent = nullptr);
-    
+
+    public slots:
+        void displayConfig(QString config);
+
+    private:
+        void setupUI();
+
     private:
         QVBoxLayout* layout_{nullptr};
 
-        void setupUI();
+        QTextEdit* configDisplayWidget_;
 };

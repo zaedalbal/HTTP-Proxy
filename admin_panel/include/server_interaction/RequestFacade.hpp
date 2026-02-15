@@ -10,6 +10,7 @@ class RequestFacade : public QObject // данный класс нужен фо�
 
         void sendAuthenticationRequest(const QString& login, const QString& password);
 
+        void sendGetProxyConfigRequest();
 
     private:
         ServerInteraction& ServerInteraction_;

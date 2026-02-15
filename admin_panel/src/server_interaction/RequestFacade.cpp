@@ -31,3 +31,12 @@ void RequestFacade::sendAuthenticationRequest(const QString& login_QString, cons
     
     ServerInteraction_.sendRequest(std::move(request));
 }
+
+void RequestFacade::sendGetProxyConfigRequest()
+{
+    api::Request request;
+    request.Command = api::CommandName::Get_proxy_config;
+    request.isChunckedRequest = false;
+    request.data_size = 0;
+    ServerInteraction_.sendRequest(std::move(request));
+}

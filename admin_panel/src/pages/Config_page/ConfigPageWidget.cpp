@@ -10,6 +10,17 @@ void ConfigPageWidget::setupUI()
 {
     layout_ = new QVBoxLayout(this);
     
-    auto* title = new QLabel("Config page");
-    layout_->addWidget(title);
+    //auto* title = new QLabel("Config page123");
+    //layout_->addWidget(title);
+
+    configDisplayWidget_ = new QTextEdit(this);
+    configDisplayWidget_->setText("NONE");
+    configDisplayWidget_->setReadOnly(true);
+
+    layout_->addWidget(configDisplayWidget_);
+}
+
+void ConfigPageWidget::displayConfig(QString config)
+{
+    configDisplayWidget_->setText(config);
 }
