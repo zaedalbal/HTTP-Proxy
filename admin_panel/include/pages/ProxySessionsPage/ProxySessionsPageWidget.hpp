@@ -4,8 +4,9 @@
 #include <QTextEdit>
 #include <QStringList>
 #include <QStringView>
+#include <QTableView>
 #include "api.hpp"
-#include "pages/ProxySessionsPage/structSessionInfo.hpp"
+#include "pages/ProxySessionsPage/SessionsModel/SessionsModel.hpp"
 
 class ProxySessionsPageWidget : public QWidget
 {
@@ -15,7 +16,7 @@ class ProxySessionsPageWidget : public QWidget
         explicit ProxySessionsPageWidget(QWidget* parent = nullptr);
     
     public slots:
-        void displaySessions(QVector<SessionInfo> activeConnectionsVector);
+        void displaySessions(std::vector<SessionInfo> sessions);
     
     private:
         void setupUI();
@@ -23,5 +24,7 @@ class ProxySessionsPageWidget : public QWidget
     private:
         QVBoxLayout* layout_{nullptr};
 
-        QTextEdit* sessionsDisplayWidget_;
+        QTableView* table_;
+
+        SessionModel* SessionModel_;
 };

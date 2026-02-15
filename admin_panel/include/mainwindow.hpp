@@ -43,7 +43,7 @@ class MainWindow : public QMainWindow
 
         // страницы
         QStackedWidget* Pages;
-        ProxySessionsPageWidget* ActiveConnectionsPage;
+        ProxySessionsPageWidget* ProxySessionsPage;
         AuthenticationPageWidget* AuthenticationPage;
         ConfigPageWidget* ConfigPage;
         LogPageWidget* LogPage;

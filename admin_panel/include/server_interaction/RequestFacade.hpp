@@ -12,6 +12,8 @@ class RequestFacade : public QObject // данный класс нужен фо�
 
         void sendGetProxyConfigRequest();
 
+        void sendGetProxySessionsRequest();
+
     private:
         ServerInteraction& ServerInteraction_;
 

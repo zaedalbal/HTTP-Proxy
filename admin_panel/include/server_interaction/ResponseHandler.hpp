@@ -17,7 +17,7 @@ class ResponseHandler : public QObject // при взаимодействии с
 
         void Signal_AuthenticationUnsuccessful();
 
-        void Signal_Get_proxy_sessions(QVector<SessionInfo> sessions);
+        void Signal_Get_proxy_sessions(std::vector<SessionInfo> sessions);
 
         void Signal_Get_proxy_config(QString config);
 

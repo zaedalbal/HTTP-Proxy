@@ -1,14 +1,13 @@
 #include "server_interaction/ResponseHandler.hpp"
 #include <QDebug>
 #include <iostream>
+#include <QHostAddress>
 
 ResponseHandler::ResponseHandler()
 {}
 
 void ResponseHandler::handleResponse(std::shared_ptr<api::Response> response)
 {
-    std::cout << "handleResponse called\n";
-    //std::cout << "RequestCommand raw value: " << static_cast<int>(response->RequestCommand) << "\n";
     switch (response->RequestCommand)
     {
         case api::CommandName::AuthenticationRequest:
@@ -56,5 +55,31 @@ void ResponseHandler::handleRequestCommand_Get_proxy_config(std::shared_ptr<api:
 
 void ResponseHandler::handleRequestCommand_Get_proxy_sessions(std::shared_ptr<api::Response> response)
 {
-    QVector<SessionInfo> sessions;
+    struct Session
+    {
+        quint32 ip_;
+    };
+    std::vector<SessionInfo> sessions;
+    if(response->RequestFailed || response->data_size == 0)
+    {
+        emit Signal_Get_proxy_sessions(sessions);
+        return;
+    }
+    if(response->data_size % sizeof(Session) != 0)
+    {
+        emit Signal_Get_proxy_sessions(sessions);
+        return;
+    }
+    size_t count = response->data_size / sizeof(Session);
+    const Session* rawSessions = reinterpret_cast<const Session*>(response->data.get());
+    sessions.reserve(count);
+    for(size_t i = 0; i < count; ++i)
+    {
+        QHostAddress addr(rawSessions[i].ip_);
+        QString ipString = addr.toString();
+        SessionInfo session;
+        session.ip_ = ipString;
+        sessions.push_back(session);
+    }
+    emit Signal_Get_proxy_sessions(sessions);
 }

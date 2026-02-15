@@ -40,3 +40,12 @@ void RequestFacade::sendGetProxyConfigRequest()
     request.data_size = 0;
     ServerInteraction_.sendRequest(std::move(request));
 }
+
+void RequestFacade::sendGetProxySessionsRequest()
+{
+    api::Request request;
+    request.Command = api::CommandName::Get_proxy_sessions;
+    request.isChunckedRequest = false;
+    request.data_size = 0;
+    ServerInteraction_.sendRequest(std::move(request));
+}

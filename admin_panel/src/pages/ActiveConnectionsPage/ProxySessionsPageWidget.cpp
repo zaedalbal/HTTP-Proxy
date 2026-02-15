@@ -10,12 +10,24 @@ void ProxySessionsPageWidget::setupUI()
 {
     layout_ = new QVBoxLayout(this);
 
-    sessionsDisplayWidget_ = new QTextEdit(this);
-    sessionsDisplayWidget_->setText("NONE");
-    sessionsDisplayWidget_->setReadOnly(true);
-
-    layout_->addWidget(sessionsDisplayWidget_);
+    SessionModel_ = new SessionModel(this);
+    table_ = new QTableView(this);
+    table_->setModel(SessionModel_);
+    table_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table_->setSelectionMode(QAbstractItemView::SingleSelection);
+    layout_->addWidget(table_);
 }
 
-void ProxySessionsPageWidget::displaySessions(QVector<SessionInfo> activeConnectionsVector)
-{}
+void ProxySessionsPageWidget::displaySessions(std::vector<SessionInfo> sessions)
+{
+    if(sessions.empty())
+    {
+        std::vector<SessionInfo> emptySessions;
+        SessionInfo emptySession;
+        emptySession.ip_ = "NONE SESSIONS";
+        emptySessions.push_back(emptySession);
+        SessionModel_->setSessions(emptySessions);
+    }
+    else
+        SessionModel_->setSessions(sessions);
+}

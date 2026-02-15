@@ -3,7 +3,6 @@
 #include <openssl/evp.h>
 #include "globals/globals.hpp"
 
-#define DEBUG
 #define READ_BUFFER_SIZE 16384
 
 AdminPanelSession::AdminPanelSession(boost::asio::ip::tcp::socket socket)

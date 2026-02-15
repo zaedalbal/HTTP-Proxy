@@ -55,6 +55,7 @@ QVariant SessionModel::data(const QModelIndex& index, int role) const
         default:
             return{};
     }
+    return{};
 }
 
 QVariant SessionModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -72,4 +73,5 @@ QVariant SessionModel::headerData(int section, Qt::Orientation orientation, int 
                 return{};
         }
     }
+    return{};
 }

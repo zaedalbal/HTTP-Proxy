@@ -19,7 +19,6 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     RequestFacade_ = new RequestFacade(ServerInteraction_);
-    std::cout << "constructor called\n";
     initialSetup();
 } 
 
@@ -51,7 +50,6 @@ void MainWindow::initialSetup()
 
 void MainWindow::setupMainUI()
 {
-    std::cout << "Setup mainUI\n";
     // настройка меню
     AuthenticationPage->hide();
     Menu = new QListWidget;
@@ -62,21 +60,25 @@ void MainWindow::setupMainUI()
     connect(Menu, &QListWidget::currentRowChanged, this, [this](int row)
     {
         QListWidgetItem* item = Menu->item(row);
-        if(item && item->text() == "Config")
+        auto text = item->text();
+        if(item && text == "Config")
             RequestFacade_->sendGetProxyConfigRequest();
+        else if(text == "Proxy sessions")
+            RequestFacade_->sendGetProxySessionsRequest();
     });
 
     // настройка страниц
     Pages = new QStackedWidget(Central);
 
-    ActiveConnectionsPage = new ProxySessionsPageWidget;
+    ProxySessionsPage = new ProxySessionsPageWidget;
+    connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_sessions, ProxySessionsPage, &ProxySessionsPageWidget::displaySessions);
 
     ConfigPage = new ConfigPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_config, ConfigPage, &ConfigPageWidget::displayConfig);
 
     LogPage = new LogPageWidget;
 
-    Pages->addWidget(ActiveConnectionsPage);
+    Pages->addWidget(ProxySessionsPage);
     Pages->addWidget(ConfigPage);
     Pages->addWidget(LogPage);
 
