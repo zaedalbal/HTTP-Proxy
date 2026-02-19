@@ -13,6 +13,8 @@ class AdminPanelBridge
     private:
         boost::asio::awaitable<void> accept_connections();
 
+        void generate_and_set_certificates();
+
     private:
         unsigned short port_;
 

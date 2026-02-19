@@ -1,6 +1,11 @@
 #include "globals/globals.hpp"
 #include "admin_panel_bridge/admin_panel_bridge.hpp"
 #include "admin_panel_bridge/admin_panel_session.hpp"
+#include <stdexcept>
+
+
+#include <unistd.h>
+#include <sys/wait.h>
 
 AdminPanelBridge::AdminPanelBridge(boost::asio::io_context& context, unsigned short port)
 : io_context_(context), port_(port),
@@ -8,8 +13,16 @@ acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4()
 ssl_context_(boost::asio::ssl::context::tls_server)
 {
     ssl_context_.set_verify_mode(boost::asio::ssl::verify_none);
-    ssl_context_.use_certificate_chain_file("server.crt");
-    ssl_context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
+    try
+    {
+        ssl_context_.use_certificate_chain_file("server.crt");
+        ssl_context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
+    }
+    catch(const boost::system::system_error& ex)
+    {
+        std::cout << "Certificates for admin_panel not found or invalid, generating..." << std::endl;
+        generate_and_set_certificates();
+    }
 }
 
 boost::asio::awaitable<void> AdminPanelBridge::run()
@@ -44,4 +57,30 @@ boost::asio::awaitable<void> AdminPanelBridge::accept_connections()
 #endif
         }
     }
+}
+
+void AdminPanelBridge::generate_and_set_certificates()
+{
+
+    pid_t pid = fork();
+    if(pid == -1)
+        throw std::runtime_error("Failed to fork for certificate generation");
+
+    if(pid == 0)
+    {
+        execl("/bin/bash", "bash", "../../create_certificates.sh", ".", nullptr);
+        perror("execl filed");
+        _exit(1);
+    }
+    else
+    {
+        int status;
+        waitpid(pid, &status, 0);
+        if(!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+        {
+            throw std::runtime_error("Certificate generation script failed");
+        }
+    }
+    ssl_context_.use_certificate_chain_file("server.crt");
+    ssl_context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
 }
