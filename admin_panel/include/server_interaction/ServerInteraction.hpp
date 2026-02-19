@@ -1,5 +1,6 @@
 #pragma once
 #include <QTcpSocket>
+#include <QSslSocket>
 #include "api.hpp"
 
 class ServerInteraction : public QObject
@@ -33,6 +34,6 @@ class ServerInteraction : public QObject
 
         QByteArray remainingData_;
 
-        QTcpSocket socket_;
+        QSslSocket socket_;
 
 };

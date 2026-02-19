@@ -2,11 +2,23 @@
 
 ServerInteraction::ServerInteraction()
 {
-    connect(&socket_, &QTcpSocket::bytesWritten, this, &ServerInteraction::onBytesWritten);
-    connect(&socket_, &QTcpSocket::readyRead, this, &ServerInteraction::onReadyRead);
+    connect(&socket_, &QSslSocket::bytesWritten, this, &ServerInteraction::onBytesWritten);
+    connect(&socket_, &QSslSocket::readyRead, this, &ServerInteraction::onReadyRead);
 
-    connect(&socket_, &QTcpSocket::connected, this, [this](){emit successfulConnect();});
-    connect(&socket_, &QTcpSocket::disconnected, this, [this](){emit disconnected();}); 
+    connect(&socket_, &QSslSocket::connected, this, [this](){emit socket_.startClientEncryption();});
+    connect(&socket_, &QSslSocket::encrypted, this, [this](){emit successfulConnect();});
+
+    // В БУДУЩЕМ УБРАТЬ ЭТОТ CONNECT, КОГДА БУДЕТ ДОБАВЛЯТЬСЯ ПОДДЕРЖКА СЕРТИФИКАТОВ
+    // (ПОКА ЧТО ОШИБКИ СВЯЗАННЫЕ С СЕРТИФИКАТЫМИ ПРОСТО ИГНОРИРУЮТСЯ)
+    connect(&socket_, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors), this,
+    [this](const QList<QSslError> &errors)
+    {
+        for(const auto &err : errors)
+            qWarning() << "SSL Error: " << err.errorString();
+        socket_.ignoreSslErrors();
+    });
+
+    connect(&socket_, &QSslSocket::disconnected, this, [this](){emit disconnected();}); 
 }
 
 void ServerInteraction::connectToServer(QString host, quint16 port)
