@@ -5,7 +5,7 @@
 
 #define READ_BUFFER_SIZE 16384
 
-AdminPanelSession::AdminPanelSession(boost::asio::ip::tcp::socket socket)
+AdminPanelSession::AdminPanelSession(boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket)
     : panel_socket_(std::move(socket))
 {
 }
@@ -21,7 +21,7 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
     size_t i = 0;
 #endif
 
-    while(panel_socket_.is_open())
+    while(panel_socket_.next_layer().is_open())
     {
 #ifdef DEBUG
             __PROXY_GLOBALS__::DEBUG_LOGGER << "New iterations in AminPanelSession::read_request: i = " << i << std::endl;
@@ -33,14 +33,12 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
         boost::asio::redirect_error(boost::asio::use_awaitable, ec));
         if(ec)
         {
-            panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-            panel_socket_.close();
+            co_await close_session();
             co_return;
         }
         if(header.data_size > READ_BUFFER_SIZE*4)
         {
-            panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-            panel_socket_.close();
+            co_await close_session();
             co_return;
         }
         auto request = std::make_shared<api::Request>(header.data_size);
@@ -54,8 +52,7 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
             boost::asio::redirect_error(boost::asio::use_awaitable, ec));
             if(ec)
             {
-                panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                panel_socket_.close();
+                co_await close_session();
                 co_return;
             }
         }
@@ -63,7 +60,7 @@ boost::asio::awaitable<void> AdminPanelSession::read_request()
         {
             if (request->Command != api::CommandName::AuthenticationRequest)
             {
-                panel_socket_.close();
+                co_await close_session();
                 co_return;
             }
             else
@@ -145,11 +142,10 @@ boost::asio::awaitable<void> AdminPanelSession::authorize(std::shared_ptr<api::R
     response->isChunckedResponse = false;
     response->data_size = 0;
     if(__PROXY_GLOBALS__::LOG_ON)
-        __PROXY_GLOBALS__::LOGGER << "Unsuccessful login to the panel from:" << panel_socket_.remote_endpoint().address().to_string() << std::endl;
+        __PROXY_GLOBALS__::LOGGER << "Unsuccessful login to the panel from:"
+        << panel_socket_.next_layer().remote_endpoint().address().to_string() << std::endl;
     co_await send_response(response);
-    boost::system::error_code ec;
-    panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    panel_socket_.close();
+    co_await close_session();
 }
 
 boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<api::Request> request)
@@ -231,9 +227,15 @@ boost::asio::awaitable<void> AdminPanelSession::send_response(std::shared_ptr<ap
     (panel_socket_, buffers, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if(ec)
     {
-        panel_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-        panel_socket_.close();
+        co_await close_session();
         co_return;
     }
     co_return;
+}
+
+boost::asio::awaitable<void> AdminPanelSession::close_session()
+{
+    boost::system::error_code ec;
+    co_await panel_socket_.async_shutdown(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+    panel_socket_.next_layer().close(ec);
 }

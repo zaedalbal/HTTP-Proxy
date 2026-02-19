@@ -22,6 +22,7 @@ target_link_libraries(
     tomlplusplus::tomlplusplus
     ${Boost_LIBRARIES}
     OpenSSL::Crypto
+    OpenSSL::SSL
 )
 
 enable_testing()
@@ -39,5 +40,5 @@ target_include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/api/include
 )
-target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES} OpenSSL::Crypto)
+target_link_libraries(tests GTest::gtest_main tomlplusplus::tomlplusplus ${Boost_LIBRARIES} OpenSSL::Crypto OpenSSL::SSL)
 gtest_discover_tests(tests)
