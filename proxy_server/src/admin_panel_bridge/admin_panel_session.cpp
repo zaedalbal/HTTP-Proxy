@@ -194,6 +194,21 @@ boost::asio::awaitable<void> AdminPanelSession::hanlde_request(std::shared_ptr<a
     break;
     }
 
+    case api::CommandName::Get_proxy_log:
+    {
+        auto log = Facade_.try_get_log();
+        if(log.has_value())
+        {
+            auto log_to_send = log.value();
+            response->data_size = log_to_send.size() * sizeof(char);
+            response->data = std::make_unique<char[]>(response->data_size);
+            std::memcpy(response->data.get(), log_to_send.data(), response->data_size);
+        }
+        else
+            response->RequestFailed = true;
+        break;
+    }
+
     default:
         response->RequestFailed = true;
         break;

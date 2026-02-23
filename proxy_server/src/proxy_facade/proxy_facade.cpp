@@ -1,5 +1,6 @@
 #include "proxy_facade/proxy_facade.hpp"
 #include "globals/globals.hpp"
+#include <fstream>
 
 ProxyFacade::ProxyFacade()
 {}
@@ -62,4 +63,14 @@ Proxy_Config::Proxy_Settings ProxyFacade::get_config()
 }
 
 std::string ProxyFacade::get_log()
-{}
+{
+    const std::size_t bytes_to_read = 16384;
+    std::string log;
+    log.resize(bytes_to_read);
+    std::ifstream file(__PROXY_GLOBALS__::PROXY_CONFIG.log_file_name);
+    if(!file)    
+        throw std::runtime_error("Cant't open file");
+    file.read(log.data(), bytes_to_read);
+    file.close();
+    return log;
+}
