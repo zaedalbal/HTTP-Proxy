@@ -21,6 +21,10 @@ void ResponseHandler::handleResponse(std::shared_ptr<api::Response> response)
         case api::CommandName::Get_proxy_sessions:
             handleRequestCommand_Get_proxy_sessions(response);
             break;
+        
+        case api::CommandName::Get_proxy_log:
+            handleRequestCommand_Get_proxy_log(response);
+            break;
 
         default:
             qWarning() << "Unknown command!";
@@ -82,4 +86,13 @@ void ResponseHandler::handleRequestCommand_Get_proxy_sessions(std::shared_ptr<ap
         sessions.push_back(session);
     }
     emit Signal_Get_proxy_sessions(sessions);
+}
+
+void ResponseHandler::handleRequestCommand_Get_proxy_log(std::shared_ptr<api::Response> response)
+{
+    std::string log_std_string;
+    log_std_string.resize(response->data_size);
+    std::memcpy(log_std_string.data(), response->data.get(), response->data_size);
+    QString log = QString::fromStdString(log_std_string);
+    emit Signal_Get_proxy_log(log);
 }

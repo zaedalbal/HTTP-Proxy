@@ -49,3 +49,12 @@ void RequestFacade::sendGetProxySessionsRequest()
     request.data_size = 0;
     ServerInteraction_.sendRequest(std::move(request));
 }
+
+void RequestFacade::sendGetProxyLog()
+{
+    api::Request request;
+    request.Command = api::CommandName::Get_proxy_log;
+    request.isChunckedRequest = false;
+    request.data_size = 0;
+    ServerInteraction_.sendRequest(std::move(request));
+}

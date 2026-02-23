@@ -21,11 +21,15 @@ class ResponseHandler : public QObject // при взаимодействии с
 
         void Signal_Get_proxy_config(QString config);
 
+        void Signal_Get_proxy_log(QString log);
+
     private:
         void handleRequestCommand_AuthenticationRequest(std::shared_ptr<api::Response> response);
 
         void handleRequestCommand_Get_proxy_sessions(std::shared_ptr<api::Response> response);
 
         void handleRequestCommand_Get_proxy_config(std::shared_ptr<api::Response> response);
+
+        void handleRequestCommand_Get_proxy_log(std::shared_ptr<api::Response> response);
 
 };

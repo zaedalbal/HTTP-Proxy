@@ -10,6 +10,14 @@ void LogPageWidget::setupUI()
 {
     layout_ = new QVBoxLayout(this);
     
-    auto* title = new QLabel("Log page");
-    layout_->addWidget(title);
+    logDisplayWidget = new QPlainTextEdit;
+    logDisplayWidget->setPlainText("NONE");
+    logDisplayWidget->setReadOnly(true);
+
+    layout_->addWidget(logDisplayWidget);
+}
+
+void LogPageWidget::displayLog(QString log)
+{
+    logDisplayWidget->setPlainText(log);
 }

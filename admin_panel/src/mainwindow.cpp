@@ -65,6 +65,8 @@ void MainWindow::setupMainUI()
             RequestFacade_->sendGetProxyConfigRequest();
         else if(text == "Proxy sessions")
             RequestFacade_->sendGetProxySessionsRequest();
+        else if(text == "Log")
+            RequestFacade_->sendGetProxyLog();
     });
 
     // настройка страниц
@@ -77,6 +79,7 @@ void MainWindow::setupMainUI()
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_config, ConfigPage, &ConfigPageWidget::displayConfig);
 
     LogPage = new LogPageWidget;
+    connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_log, LogPage, &LogPageWidget::displayLog);
 
     Pages->addWidget(ProxySessionsPage);
     Pages->addWidget(ConfigPage);
