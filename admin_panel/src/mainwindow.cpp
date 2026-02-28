@@ -80,6 +80,7 @@ void MainWindow::setupMainUI()
 
     LogPage = new LogPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_log, LogPage, &LogPageWidget::displayLog);
+    connect(LogPage, &LogPageWidget::refreshButtonClicked, RequestFacade_, &RequestFacade::sendGetProxyLog);
 
     Pages->addWidget(ProxySessionsPage);
     Pages->addWidget(ConfigPage);
