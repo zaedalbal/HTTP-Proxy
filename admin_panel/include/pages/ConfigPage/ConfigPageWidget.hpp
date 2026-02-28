@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QTextEdit>
+#include <QPushButton>
 
 class ConfigPageWidget : public QWidget
 {
@@ -13,6 +14,9 @@ class ConfigPageWidget : public QWidget
     public slots:
         void displayConfig(QString config);
 
+    signals:
+        void refreshButtonClicked();
+
     private:
         void setupUI();
 
@@ -20,4 +24,6 @@ class ConfigPageWidget : public QWidget
         QVBoxLayout* layout_{nullptr};
 
         QTextEdit* configDisplayWidget_;
+
+        QPushButton* refreshButton_;
 };

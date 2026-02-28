@@ -74,9 +74,11 @@ void MainWindow::setupMainUI()
 
     ProxySessionsPage = new ProxySessionsPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_sessions, ProxySessionsPage, &ProxySessionsPageWidget::displaySessions);
+    connect(ProxySessionsPage, &ProxySessionsPageWidget::refreshButtonClicked, RequestFacade_, &RequestFacade::sendGetProxySessionsRequest);
 
     ConfigPage = new ConfigPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_config, ConfigPage, &ConfigPageWidget::displayConfig);
+    connect(ConfigPage, &ConfigPageWidget::refreshButtonClicked, RequestFacade_, &RequestFacade::sendGetProxyConfigRequest);
 
     LogPage = new LogPageWidget;
     connect(&ResponseHandler_, &ResponseHandler::Signal_Get_proxy_log, LogPage, &LogPageWidget::displayLog);

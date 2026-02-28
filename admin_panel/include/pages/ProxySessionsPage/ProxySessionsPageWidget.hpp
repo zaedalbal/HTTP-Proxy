@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QStringView>
 #include <QTableView>
+#include <QPushButton>
 #include "api.hpp"
 #include "pages/ProxySessionsPage/SessionsModel/SessionsModel.hpp"
 
@@ -17,6 +18,8 @@ class ProxySessionsPageWidget : public QWidget
     
     public slots:
         void displaySessions(std::vector<SessionInfo> sessions);
+    signals:
+        void refreshButtonClicked();
     
     private:
         void setupUI();
@@ -27,4 +30,6 @@ class ProxySessionsPageWidget : public QWidget
         QTableView* table_;
 
         SessionModel* SessionModel_;
+
+        QPushButton* refreshButton_;
 };

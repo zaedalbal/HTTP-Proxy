@@ -22,7 +22,7 @@ class LogPageWidget : public QWidget
 
         QPlainTextEdit* logDisplayWidget;
 
-        QPushButton* refreshButton;
+        QPushButton* refreshButton_;
 
         void setupUI();
 };

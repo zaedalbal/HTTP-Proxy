@@ -15,7 +15,13 @@ void ProxySessionsPageWidget::setupUI()
     table_->setModel(SessionModel_);
     table_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_->setSelectionMode(QAbstractItemView::SingleSelection);
+    
+    refreshButton_ = new QPushButton;
+    refreshButton_->setText("refresh");
+    connect(refreshButton_, &QPushButton::clicked, this, [this](){emit refreshButtonClicked();});
+
     layout_->addWidget(table_);
+    layout_->addWidget(refreshButton_);
 }
 
 void ProxySessionsPageWidget::displaySessions(std::vector<SessionInfo> sessions)
