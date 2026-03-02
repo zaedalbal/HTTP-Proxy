@@ -16,7 +16,7 @@
 Для сборки и запуска необходимы:
 
 * Компилятор с поддержкой **C++23**
-* **CMake 3.31+**
+* **CMake 3.25+**
 * **Boost 1.82+**
   (используются `asio`, `beast`, `system`)
 * **OpenSSL**
@@ -44,7 +44,7 @@ sudo dnf install git cmake gcc-c++ boost-devel gtest-devel openssl-devel
 sudo pacman -S git cmake gcc boost gtest openssl
 ```
 
-(если ваша версия CMake < 3.31, вы можете попробовать поменять CMakeLists.txt)
+(если ваша версия CMake < 3.25, вы можете попробовать поменять CMakeLists.txt)
 
 ---
 
